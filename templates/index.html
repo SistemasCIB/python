@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Página Simple</title>
+    <title>Log de Mensajes</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -18,11 +18,36 @@
             color: #666;
             line-height: 1.6;
         }
+        table{
+           width:  80%;
+           border-collapse: collapse;
+           margin: 20px auto;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
     </style>
 </head>
 <body>
-    <h1>Bienvenido</h1>
-    <p>Esta es una página HTML simple.</p>
+    <h1>registro de mensajes</h1>
+
+    <table>
+        
+            <tr>
+                <th>Fecha y Hora</th>
+                <th>Mensaje</th>
+            </tr>
+             {% for registro in registros %}
+               <tr>
+                    <td>{{ registro.fecha_y_hora }}</td>
+                    <td>{{ registro.texto }}</td>
+               </tr>
+             {% endfor %}
+        
+  
+    </table>
     <p>Puedes agregar más contenido aquí.</p>
 </body>
 </html>
