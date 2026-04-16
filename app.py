@@ -54,7 +54,6 @@ def webhook():
         return response
 
 def verificar_token(request):
-    print("ARGS:", request.args) 
     token = request.args.get('hub.verify_token')
     challenge = request.args.get('hub.challenge')
     if challenge and token == TOKEN_ANDERCODE:
@@ -80,8 +79,9 @@ def recibir_mensaje(request):
                if "text" in messages:
                    text= messages["text"]["body"]
                    numero = messages["from"]
-                   agregar_mensajes_log(f"Mensaje recibido: {text} de {numero}")
+                  
                    enviar_mensajes(text,numero)
+                   
         return jsonify({'message': 'EVENT_RECEIVED'})
     except Exception as e:
         return jsonify({'message': 'EVENT_RECEIVED'})                   
