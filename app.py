@@ -59,13 +59,13 @@ def verificar_token(request):
     if challenge and token == TOKEN_ANDERCODE:
         return challenge
     else:
-        return jsonify({'error': 'Token de verificación no válido'}), 401
+        return jsonify({'error': 'Token invalido'}), 401
   
 
 def recibir_mensaje(request):
     req = request.get_json()
     agregar_mensajes_log(req)
-    
+
     return jsonify({'status': 'Mensaje recibido correctamente'})
  
 if __name__ == '__main__':
