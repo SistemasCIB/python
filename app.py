@@ -63,28 +63,35 @@ def verificar_token(request):
         return jsonify({'error': 'Token invalido'}), 401
 
 def recibir_mensaje(request):
-
     try:
         req = request.get_json()
-        entry = req.get('entry', [0])
-        changes = entry('changes', [0])
-        value = changes ['value']  
-        objeto_messages = value['messages']  
+        entry = req.get('entry', [])
+        if not entry:
+            return jsonify({'message': 'EVENT_RECEIVED'})
+        
+        changes = entry[0].get('changes', [])
+        if not changes:
+            return jsonify({'message': 'EVENT_RECEIVED'})
+        
+        value = changes[0].get('value', {})
+        objeto_messages = value.get('messages', [])
 
         if objeto_messages:
             messages = objeto_messages[0]
             if "type" in messages:
-               tipo = messages["type"]
-               if tipo == "interactive":
-                   return 0
-               if "text" in messages:
-                   text= messages["text"]["body"]
-                   numero = messages["from"]
-                   agregar_mensajes_log(f"Mensaje recibido: {text} de {numero}")
-                   enviar_mensajes(text,numero)
+                tipo = messages["type"]
+                if tipo == "interactive":  # ✅ typo corregido
+                    return jsonify({'message': 'EVENT_RECEIVED'})
+                if "text" in messages:
+                    text = messages["text"]["body"]
+                    numero = messages["from"]
+                    agregar_mensajes_log(f"Mensaje recibido: {text} de {numero}")
+                    enviar_mensajes(text, numero)  # ✅ ahora sí se llama
+
         return jsonify({'message': 'EVENT_RECEIVED'})
     except Exception as e:
-        return jsonify({'message': 'EVENT_RECEIVED'})                   
+        agregar_mensajes_log(f"Error: {str(e)}")
+        return jsonify({'message': 'EVENT_RECEIVED'})                  
 
 def enviar_mensajes(texto,number):
         texto = texto.lower()
