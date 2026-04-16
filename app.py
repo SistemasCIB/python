@@ -54,13 +54,13 @@ def webhook():
         return response
 
 def verificar_token(request):
-    token = request.args.get('hub.verification_token')
+    print("ARGS:", request.args) 
+    token = request.args.get('hub.verify_token')
     challenge = request.args.get('hub.challenge')
     if challenge and token == TOKEN_ANDERCODE:
         return challenge
     else:
         return jsonify({'error': 'Token invalido'}), 401
-  
 
 def recibir_mensaje(request):
     req = request.get_json()
