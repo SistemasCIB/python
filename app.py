@@ -66,7 +66,24 @@ def recibir_mensaje(request):
     req = request.get_json()
     agregar_mensajes_log(json.dumps(req))
 
-    return jsonify({'status': 'Mensaje recibido correctamente'})
+    try:
+        req = request.get_json()
+        entry = req.get('entry', [0])
+        changes = entry[0].get('changes', [0])
+        value = changes[0].get('value', {})
+        objeto_messages = value['messages']  
+
+        agregar_mensajes_log(json.dumps(objeto_messages)) 
+
+
+
+        return jsonify({'message': 'EVENT_RECEIVED'})
+    except Exception as e:
+        return jsonify({'message': 'EVENT_RECEIVED'})
+    
+     
+
+    
  
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=80, debug=True)
