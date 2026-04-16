@@ -67,21 +67,21 @@ def recibir_mensaje(request):
     try:
         req = request.get_json()
         entry = req.get('entry', [0])
-        changes = entry[0].get('changes', [0])
-        value = changes[0].get('value', {})
+        changes = entry('changes', [0])
+        value = changes ['value']  
         objeto_messages = value['messages']  
 
         if objeto_messages:
             messages = objeto_messages[0]
             if "type" in messages:
                tipo = messages["type"]
-               if tipo == "interative":
+               if tipo == "interactive":
                    return 0
                if "text" in messages:
                    text= messages["text"]["body"]
                    numero = messages["from"]
                    agregar_mensajes_log(f"Mensaje recibido: {text} de {numero}")
-
+                   enviar_mensajes(text,numero)
         return jsonify({'message': 'EVENT_RECEIVED'})
     except Exception as e:
         return jsonify({'message': 'EVENT_RECEIVED'})                   
@@ -118,7 +118,7 @@ def enviar_mensajes(texto,number):
        
         headers = {
         'Content-Type': 'application/json',
-        'Authorization': 'Bearer EAAY5YGNZBIz8BRMGZBj0ZBTXGlnWfBJCXkKeW58sFdxnZB2bwzNu5sQh5aE3wppemLZBS55SSH11jha8GnVxHXYl5rxU4ZBi09TomNKtPwFjtU8cwoYBMJxeveZCfWBfO4CJIEAreDcAztZCEfF79QUEKg1zuBJXyZCWIjC91wdnJ6q39WEPsR7Nr7OyTOYnvJo32sJW3ogEfP5fHYT7ULzjY06kDnmmtrnOuMxcvC1HDm7FcwX9fKoM4bM5t3TDsLZAM4Fd3ATJXxnu2rY3TB4HY4IAZDZD'
+        'Authorization': 'Bearer EAAY5YGNZBIz8BROZAu6p5Rf47pYtjvlZAYUtPkoDksDXYN4gBkx96ZBmvMuJg4vBDQrZCmaDAsARL3A6XReXmnYG84kfsMwfZCH1IFFAsXlFzz1NerVd6HMm6uv63CrcdSaviknNivnIbAICzwTapJl4OKFZANv8E2f3GDbMVMYKj3cgX46hKFLZB3KwWpUvJjBKZBFcoyYlxVcPgyIgLIdlcV7aTRw0leAZCPBZCgbM9DU1W9fqcWLd04P4fzkdhgoyBg1yo2btCVZAiA2e4pBS0rkW0AZDZD'
         }
         connection = http.client.HTTPSConnection('graph.facebook.com')
         
