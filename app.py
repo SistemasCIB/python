@@ -63,35 +63,28 @@ def verificar_token(request):
         return jsonify({'error': 'Token invalido'}), 401
 
 def recibir_mensaje(request):
+
     try:
         req = request.get_json()
-        entry = req.get('entry', [])
-        if not entry:
-            return jsonify({'message': 'EVENT_RECEIVED'})
-        
-        changes = entry[0].get('changes', [])
-        if not changes:
-            return jsonify({'message': 'EVENT_RECEIVED'})
-        
-        value = changes[0].get('value', {})
-        objeto_messages = value.get('messages', [])
+        entry = req.get('entry', [0])
+        changes = entry('changes', [0])
+        value = changes ['value']  
+        objeto_messages = value['messages']  
 
         if objeto_messages:
             messages = objeto_messages[0]
             if "type" in messages:
-                tipo = messages["type"]
-                if tipo == "interactive":
-                    return jsonify({'message': 'EVENT_RECEIVED'})
-                if "text" in messages:
-                    text = messages["text"]["body"]
-                    numero = messages["from"]
-                    agregar_mensajes_log(f"Mensaje recibido: {text} de {numero}")
-                    enviar_mensajes(text, numero) 
-
+               tipo = messages["type"]
+               if tipo == "interactive":
+                   return 0
+               if "text" in messages:
+                   text= messages["text"]["body"]
+                   numero = messages["from"]
+                   agregar_mensajes_log(f"Mensaje recibido: {text} de {numero}")
+                   enviar_mensajes(text,numero)
         return jsonify({'message': 'EVENT_RECEIVED'})
     except Exception as e:
-        agregar_mensajes_log(f"Error: {str(e)}")
-        return jsonify({'message': 'EVENT_RECEIVED'})                  
+        return jsonify({'message': 'EVENT_RECEIVED'})                   
 
 def enviar_mensajes(texto,number):
         texto = texto.lower()
@@ -115,7 +108,7 @@ def enviar_mensajes(texto,number):
                 "type": "text",
                 "text": {
                     "preview_url": False,
-                    "body": "Elige una de las siguientes opciones: \n1. Agendar Cita \n2. Confirmar cita\n3. Recibir asesoria"
+                    "body": "no entiendo tu mensaje, por favor intenta con otra cosa"
                     
 
                 }
@@ -125,7 +118,7 @@ def enviar_mensajes(texto,number):
        
         headers = {
         'Content-Type': 'application/json',
-        'Authorization': 'Bearer EAAY5YGNZBIz8BROZAu6p5Rf47pYtjvlZAYUtPkoDksDXYN4gBkx96ZBmvMuJg4vBDQrZCmaDAsARL3A6XReXmnYG84kfsMwfZCH1IFFAsXlFzz1NerVd6HMm6uv63CrcdSaviknNivnIbAICzwTapJl4OKFZANv8E2f3GDbMVMYKj3cgX46hKFLZB3KwWpUvJjBKZBFcoyYlxVcPgyIgLIdlcV7aTRw0leAZCPBZCgbM9DU1W9fqcWLd04P4fzkdhgoyBg1yo2btCVZAiA2e4pBS0rkW0AZDZD'
+        'Authorization': 'Bearer EAAY5YGNZBIz8BROyfXRU76i2Xwg8QVulAahf8mEqZBqBZCiUp7oDaZAtxgv56VHeMaAxZBFZB4ZA2K1QSo8ZC3PWU6aq93ZCodrJKWOF7CZC5fESfbjsZBOIoJHb6wykIn10R5LzoB0ly88w2kWcacJxVrrX7sePj7DbjNrK1zDZBnQFAxWss2DnaNEHoQ15CmQZAech8ZCyqssuhfzy4AWZCsS2z5XZC9ZCow2vBh2LKSs1oYWWcna0m8KrbBPEdQObyVBSZCzq8wKBaHc9IkqB2vhcaDqpD4wAZDZD'
         }
         connection = http.client.HTTPSConnection('graph.facebook.com')
         
