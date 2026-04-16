@@ -2,7 +2,7 @@ from flask import Flask,request, render_template, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 import json
-
+import http.client
 
 app = Flask(__name__)
 # configuración de la base de datos SQLITE
@@ -80,18 +80,58 @@ def recibir_mensaje(request):
                if "text" in messages:
                    text= messages["text"]["body"]
                    numero = messages["from"]
-                   agregar_mensajes_log(json.dumps(text)) 
-                   agregar_mensajes_log(json.dumps(numero))
-
-
+                   agregar_mensajes_log(f"Mensaje recibido: {text} de {numero}")
 
         return jsonify({'message': 'EVENT_RECEIVED'})
     except Exception as e:
-        return jsonify({'message': 'EVENT_RECEIVED'})
-    
-     
+        return jsonify({'message': 'EVENT_RECEIVED'})                   
 
+def enviar_mensajes(texto,number):
+        texto = texto.lower()
+        if "hola" in texto:
+            data={
+                "messaging_product": "whatsapp",
+                "recipient_type": "individual",
+                "to": number,
+                "type": "text",
+                "text": {
+                    "preview_url": False,
+                    "body": "Hola, gracias por tu mensaje. ¿En qué puedo ayudarte?"
+
+                }
+            }
+        else:
+            data={
+                "messaging_product": "whatsapp",
+                "recipient_type": "individual",
+                "to": number,
+                "type": "text",
+                "text": {
+                    "preview_url": False,
+                    "body": "Hola, gracias por tu mensaje. ¿En qué puedo ayudarte?"
+                    
+
+                }
+            }
     
- 
+        data_json = json.dumps(data)
+       
+        headers = {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer EAAY5YGNZBIz8BRMGZBj0ZBTXGlnWfBJCXkKeW58sFdxnZB2bwzNu5sQh5aE3wppemLZBS55SSH11jha8GnVxHXYl5rxU4ZBi09TomNKtPwFjtU8cwoYBMJxeveZCfWBfO4CJIEAreDcAztZCEfF79QUEKg1zuBJXyZCWIjC91wdnJ6q39WEPsR7Nr7OyTOYnvJo32sJW3ogEfP5fHYT7ULzjY06kDnmmtrnOuMxcvC1HDm7FcwX9fKoM4bM5t3TDsLZAM4Fd3ATJXxnu2rY3TB4HY4IAZDZD'
+        }
+        connection = http.client.HTTPSConnection('graph.facebook.com')
+        
+        try:
+            connection.request('POST', '/v25.0/1112533955267866/messages', data, headers)
+            response = connection.getresponse()
+            print(response.status, response.reason)
+        
+        except Exception as e:
+            agregar_mensajes_log(json.dumps(e)) 
+        
+        finally: 
+            connection.close()      
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=80, debug=True)
