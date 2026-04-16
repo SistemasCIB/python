@@ -38,7 +38,7 @@ mensajes_log = []
 def agregar_mensajes_log(texto):
     mensajes_log.append(texto)
     #guardar el mensaje en la base de datos
-    nuevo_registro = log(texto=texto)
+    nuevo_registro = Log(texto=texto)
     db.session.add(nuevo_registro)
     db.session.commit()
 
@@ -54,8 +54,8 @@ def webhook():
         return response
 
 def verificar_token(request):
-    token = request.args.get('hud.verification_token')
-    challenge = request.args.get('hud.challenge')
+    token = request.args.get('hub.verification_token')
+    challenge = request.args.get('hub.challenge')
     if challenge and token == TOKEN_ANDERCODE:
         return challenge
     else:
@@ -64,7 +64,7 @@ def verificar_token(request):
 
 def recibir_mensaje(request):
     req = request.get_json()
-    agregar_mensajes_log(req)
+    agregar_mensajes_log(json.dumps(req))
 
     return jsonify({'status': 'Mensaje recibido correctamente'})
  
