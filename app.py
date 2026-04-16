@@ -80,13 +80,13 @@ def recibir_mensaje(request):
             messages = objeto_messages[0]
             if "type" in messages:
                 tipo = messages["type"]
-                if tipo == "interactive":  # ✅ typo corregido
+                if tipo == "interactive":
                     return jsonify({'message': 'EVENT_RECEIVED'})
                 if "text" in messages:
                     text = messages["text"]["body"]
                     numero = messages["from"]
                     agregar_mensajes_log(f"Mensaje recibido: {text} de {numero}")
-                    enviar_mensajes(text, numero)  # ✅ ahora sí se llama
+                    enviar_mensajes(text, numero) 
 
         return jsonify({'message': 'EVENT_RECEIVED'})
     except Exception as e:
@@ -115,7 +115,7 @@ def enviar_mensajes(texto,number):
                 "type": "text",
                 "text": {
                     "preview_url": False,
-                    "body": "no entiendo tu mensaje, por favor intenta con otra cosa"
+                    "body": "Elige una de las siguientes opciones: \n1. Agendar Cita 1\n2. Confirmar cita\n3. Rcibir asesoria"
                     
 
                 }
