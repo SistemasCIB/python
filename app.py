@@ -68,77 +68,161 @@ def recibir_mensaje(request):
         entry = req.get('entry', [])
         if not entry:
             return jsonify({'message': 'EVENT_RECEIVED'})
-        
+
         changes = entry[0].get('changes', [])
         if not changes:
             return jsonify({'message': 'EVENT_RECEIVED'})
-        
+
         value = changes[0].get('value', {})
         objeto_messages = value.get('messages', [])
 
         if objeto_messages:
-            messages = objeto_messages[0]
-            if "type" in messages:
-                tipo = messages["type"]
-                if tipo == "interactive":
-                    return jsonify({'message': 'EVENT_RECEIVED'})
-                if "text" in messages:
-                    text = messages["text"]["body"]
-                    numero = messages["from"]
-                    agregar_mensajes_log(f"Mensaje recibido: {text} de {numero}")
-                    enviar_mensajes(text, numero) 
+            mensaje = objeto_messages[0]
+            numero = mensaje['from']
+            tipo = mensaje.get('type')
+
+            # Usuario envía un botón interactivo
+            if tipo == 'interactive':
+                interactive = mensaje.get('interactive', {})
+                button_reply = interactive.get('button_reply', {})
+                opcion_id = button_reply.get('id', '')
+                manejar_opcion(numero, opcion_id)
+
+            # Usuario envía texto (respondiendo datos)
+            elif tipo == 'text':
+                texto = mensaje['text']['body']
+                agregar_mensajes_log(f"Mensaje de {numero}: {texto}")
+                manejar_flujo_datos(numero, texto)
 
         return jsonify({'message': 'EVENT_RECEIVED'})
     except Exception as e:
         agregar_mensajes_log(f"Error: {str(e)}")
-        return jsonify({'message': 'EVENT_RECEIVED'})                  
+        return jsonify({'message': 'EVENT_RECEIVED'})
 
-def enviar_mensajes(texto,number):
-        texto = texto.lower()
-        if "hola" in texto:
-            data={
-                "messaging_product": "whatsapp",
-                "recipient_type": "individual",
-                "to": number,
-                "type": "text",
-                "text": {
-                    "preview_url": False,
-                    "body": "Hola, gracias por tu mensaje. ¿En qué puedo ayudarte?"
 
-                }
+# MANEJO DEL FLUJO
+
+def manejar_opcion(numero, opcion_id):
+    """Cuando el usuario toca un botón del menú"""
+    if opcion_id == 'agendar':
+        sesiones[numero] = {'flujo': 'agendar', 'paso': 'nombre'}
+        enviar_texto(numero, "📅 *Agendar Cita*\n\nPor favor escribe tu *nombre y apellido*:")
+
+    elif opcion_id == 'confirmar':
+        sesiones[numero] = {'flujo': 'confirmar', 'paso': 'nombre'}
+        enviar_texto(numero, "✅ *Confirmar Cita*\n\nPor favor escribe tu *nombre y apellido*:")
+
+    elif opcion_id == 'asesoria':
+        sesiones[numero] = {'flujo': 'asesoria', 'paso': 'nombre'}
+        enviar_texto(numero, "💬 *Asesoría*\n\nPor favor escribe tu *nombre y apellido*:")
+
+
+def manejar_flujo_datos(numero, texto):
+    """Maneja los pasos de recolección de datos"""
+    if numero not in sesiones:
+        # Si no hay sesión activa, mostrar menú
+        enviar_menu(numero)
+        return
+
+    sesion = sesiones[numero]
+    paso = sesion.get('paso')
+
+    if paso == 'nombre':
+        sesiones[numero]['nombre'] = texto
+        sesiones[numero]['paso'] = 'documento'
+        enviar_texto(numero, "🪪 Ahora escribe tu *número de documento*:")
+
+    elif paso == 'documento':
+        sesiones[numero]['documento'] = texto
+        sesiones[numero]['paso'] = 'telefono'
+        enviar_texto(numero, "📞 Por último, escribe tu *número de teléfono*:")
+
+    elif paso == 'telefono':
+        sesiones[numero]['telefono'] = texto
+        sesiones[numero]['paso'] = 'completado'
+
+        # Guardar en log
+        flujo = sesiones[numero]['flujo']
+        nombre = sesiones[numero]['nombre']
+        documento = sesiones[numero]['documento']
+        agregar_mensajes_log(
+            f"[{flujo.upper()}] Nombre: {nombre} | Doc: {documento} | Tel: {texto} | WhatsApp: {numero}"
+        )
+
+        # Confirmar al usuario
+        enviar_texto(numero,
+            f"✅ ¡Gracias *{nombre}*! Tus datos han sido registrados.\n\n"
+            f"📋 *Resumen:*\n"
+            f"• Nombre: {nombre}\n"
+            f"• Documento: {documento}\n"
+            f"• Teléfono: {texto}\n\n"
+            f"Pronto te contactaremos. 😊"
+        )
+
+        # Limpiar sesión y mostrar menú de nuevo
+        del sesiones[numero]
+        enviar_menu(numero)
+
+
+
+# FUNCIONES DE ENVÍO
+
+
+def enviar_menu(numero):
+    """Envía el menú principal con botones"""
+    data = {
+        "messaging_product": "whatsapp",
+        "recipient_type": "individual",
+        "to": numero,
+        "type": "interactive",
+        "interactive": {
+            "type": "button",
+            "body": {
+                "text": "👋 ¡Bienvenido! ¿En qué podemos ayudarte hoy?"
+            },
+            "action": {
+                "buttons": [
+                    {"type": "reply", "reply": {"id": "agendar",   "title": "📅 Agendar Cita"}},
+                    {"type": "reply", "reply": {"id": "confirmar", "title": "✅ Confirmar Cita"}},
+                    {"type": "reply", "reply": {"id": "asesoria",  "title": "💬 Recibir Asesoría"}}
+                ]
             }
-        else:
-            data={
-                "messaging_product": "whatsapp",
-                "recipient_type": "individual",
-                "to": number,
-                "type": "text",
-                "text": {
-                    "preview_url": False,
-                    "body": "Elige una de las siguientes opciones: \n1. Agendar Cita 1\n2. Confirmar cita\n3. Rcibir asesoria"
-                    
-
-                }
-            }
-    
-        data = json.dumps(data)
-       
-        headers = {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer EAAY5YGNZBIz8BROZAu6p5Rf47pYtjvlZAYUtPkoDksDXYN4gBkx96ZBmvMuJg4vBDQrZCmaDAsARL3A6XReXmnYG84kfsMwfZCH1IFFAsXlFzz1NerVd6HMm6uv63CrcdSaviknNivnIbAICzwTapJl4OKFZANv8E2f3GDbMVMYKj3cgX46hKFLZB3KwWpUvJjBKZBFcoyYlxVcPgyIgLIdlcV7aTRw0leAZCPBZCgbM9DU1W9fqcWLd04P4fzkdhgoyBg1yo2btCVZAiA2e4pBS0rkW0AZDZD'
         }
-        connection = http.client.HTTPSConnection('graph.facebook.com')
-        
-        try:
-            connection.request('POST', '/v25.0/1112533955267866/messages', data, headers)
-            response = connection.getresponse()
-            print(response.status, response.reason)
-        
-        except Exception as e:
-            agregar_mensajes_log(json.dumps(e)) 
-        
-        finally: 
-            connection.close()      
+    }
+    enviar_request(data)
+
+
+def enviar_texto(numero, mensaje):
+    """Envía un mensaje de texto simple"""
+    data = {
+        "messaging_product": "whatsapp",
+        "recipient_type": "individual",
+        "to": numero,
+        "type": "text",
+        "text": {
+            "preview_url": False,
+            "body": mensaje
+        }
+    }
+    enviar_request(data)
+
+
+def enviar_request(data):
+    """Realiza la petición HTTP a la API de Meta"""
+    headers = {
+        'Content-Type': 'application/json',
+        'Authorization': f'Bearer EAAY5YGNZBIz8BROZAu6p5Rf47pYtjvlZAYUtPkoDksDXYN4gBkx96ZBmvMuJg4vBDQrZCmaDAsARL3A6XReXmnYG84kfsMwfZCH1IFFAsXlFzz1NerVd6HMm6uv63CrcdSaviknNivnIbAICzwTapJl4OKFZANv8E2f3GDbMVMYKj3cgX46hKFLZB3KwWpUvJjBKZBFcoyYlxVcPgyIgLIdlcV7aTRw0leAZCPBZCgbM9DU1W9fqcWLd04P4fzkdhgoyBg1yo2btCVZAiA2e4pBS0rkW0AZDZD'
+    }
+    connection = http.client.HTTPSConnection('graph.facebook.com')
+    try:
+        connection.request('POST', f'/v25.0/{PHONE_NUMBER_ID}/messages', json.dumps(data), headers)
+        response = connection.getresponse()
+        agregar_mensajes_log(f"Respuesta Meta: {response.status} {response.reason}")
+    except Exception as e:
+        agregar_mensajes_log(f"Error al enviar: {str(e)}")
+    finally:
+        connection.close()
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=80, debug=True)
