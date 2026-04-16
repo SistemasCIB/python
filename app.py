@@ -71,7 +71,17 @@ def recibir_mensaje(request):
         value = changes[0].get('value', {})
         objeto_messages = value['messages']  
 
-        agregar_mensajes_log(json.dumps(objeto_messages)) 
+        if objeto_messages:
+            messages = objeto_messages[0]
+            if "type" in messages:
+               tipo = messages["type"]
+               if tipo == "interative":
+                   return 0
+               if "text" in messages:
+                   text= messages["text"]["body"]
+                   numero = messages["from"]
+                   agregar_mensajes_log(json.dumps(text)) 
+                   agregar_mensajes_log(json.dumps(numero))
 
 
 
