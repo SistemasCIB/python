@@ -108,13 +108,13 @@ def enviar_mensajes(texto,number):
                 "type": "text",
                 "text": {
                     "preview_url": False,
-                    "body": "Hola, gracias por tu mensaje. ¿En qué puedo ayudarte?"
+                    "body": "no entiendo tu mensaje, por favor intenta con otra cosa"
                     
 
                 }
             }
     
-        data_json = json.dumps(data)
+        data = json.dumps(data)
        
         headers = {
         'Content-Type': 'application/json',
