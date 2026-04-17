@@ -35,7 +35,7 @@ def agregar_mensajes_log(texto):
     db.session.commit()
 
 TOKEN_ANDERCODE = "ANDERCODE"
-TOKEN_META = "aquí_tu_token_de_meta"  
+TOKEN_META = "EAAY5YGNZBIz8BRAjKyKpEXAuVOPyfYNitaGXr1Ae5bSnu5LZBXDhUQ9pjUR81KSO4OJ5Imk5yOPURdMJzdCb961WrcpdHqDjbMrOEtORhU28bU03q8JfRfD1MKkQvZB26iVh2ey604MPpaaEfMJJLZCRZBdwVGLLFfO7pcHBm0cVisfJI1oZB5wbdFwAqqvoaxJNVAT46WdLrbX2dVgVdqHZBByd24HwNXpTqr02YbjaCkjs1twOl7AZBhjVZBjLrLuyvVOM3417FTDiZCZC6vMt144"  
 @app.route('/webhook', methods=['GET', 'POST'])
 def webhook():
     if request.method == 'GET':
@@ -104,7 +104,7 @@ def enviar_mensajes(texto, number):
 
     headers = {
         'Content-Type': 'application/json',
-        'Authorization': 'Bearer EAAY5YGNZBIz8BRAA2HEZAMXXNHAIFgXaHsjHN7lEkPTBqCS9GeYj2rnCpndaCfHbJyBZAq3VXKLZBLOJZB0EUPOr02vhLmOgTy030NHicjHbhI0q4loqcXhVTZA6mfO777MESA46eWj9uyku36xPuLqdfZCKuNwDhKay7fK0pUjhnqlAQcEFRtUZBxoFZAncIWsJacMNxX8KFG8jAg9U4VkNAybq3nu8i4dYzaIl58n4q1Dl9AFNk7F86QcpZAZA28pl44crcT7WqSSikZBPpkK8KaaT'
+        'Authorization': 'Bearer EAAY5YGNZBIz8BRAjKyKpEXAuVOPyfYNitaGXr1Ae5bSnu5LZBXDhUQ9pjUR81KSO4OJ5Imk5yOPURdMJzdCb961WrcpdHqDjbMrOEtORhU28bU03q8JfRfD1MKkQvZB26iVh2ey604MPpaaEfMJJLZCRZBdwVGLLFfO7pcHBm0cVisfJI1oZB5wbdFwAqqvoaxJNVAT46WdLrbX2dVgVdqHZBByd24HwNXpTqr02YbjaCkjs1twOl7AZBhjVZBjLrLuyvVOM3417FTDiZCZC6vMt144'
     }
 
     connection = http.client.HTTPSConnection('graph.facebook.com')
