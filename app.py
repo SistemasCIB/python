@@ -62,7 +62,7 @@ sesiones = {}
 # CONFIGURACIÓN
 # ─────────────────────────────────────────────
 TOKEN_ANDERCODE = "ANDERCODE"
-TOKEN_META = "EAAY5YGNZBIz8BRAjKyKpEXAuVOPyfYNitaGXr1Ae5bSnu5LZBXDhUQ9pjUR81KSO4OJ5Imk5yOPURdMJzdCb961WrcpdHqDjbMrOEtORhU28bU03q8JfRfD1MKkQvZB26iVh2ey604MPpaaEfMJJLZCRZBdwVGLLFfO7pcHBm0cVisfJI1oZB5wbdFwAqqvoaxJNVAT46WdLrbX2dVgVdqHZBByd24HwNXpTqr02YbjaCkjs1twOl7AZBhjVZBjLrLuyvVOM3417FTDiZCZC6vMt144"
+TOKEN_META = "EAAY5YGNZBIz8BRGZC1vofZABnJFMib30aMXWYpxjcxbODR3EvqBY2q0j7SFYfS4ZCCCs1cpePD0zUlpWB0quL9FiCQZBQ426puW1hzkYmU0Lm5bbtfQ745qUpSXkk2M7Gc9rZATfAyK3bTsjZCb8ztoM2RRKXAhiyZAnX7tQLy8etsBNvJwxf6rFZAZC3QnCJiRlcHvZCqG5n0qZBWq6I5iyH45o6Av8jIZCdLZA4umdsfAaIEF2Vq6FKDZBMKAfspDnnyrffWPlTNVZCoo2MnUWgmxCm84o"
 PHONE_NUMBER_ID = "1112533955267866"
 NUMERO_ASESOR = "573001234567"  # 👈 cambia por el número real del asesor
 
@@ -358,7 +358,7 @@ def enviar_texto(numero, mensaje):
 def enviar_request(data):
     headers = {
         'Content-Type': 'application/json',
-        'Authorization': 'Bearer EAAY5YGNZBIz8BRAjKyKpEXAuVOPyfYNitaGXr1Ae5bSnu5LZBXDhUQ9pjUR81KSO4OJ5Imk5yOPURdMJzdCb961WrcpdHqDjbMrOEtORhU28bU03q8JfRfD1MKkQvZB26iVh2ey604MPpaaEfMJJLZCRZBdwVGLLFfO7pcHBm0cVisfJI1oZB5wbdFwAqqvoaxJNVAT46WdLrbX2dVgVdqHZBByd24HwNXpTqr02YbjaCkjs1twOl7AZBhjVZBjLrLuyvVOM3417FTDiZCZC6vMt144'
+        'Authorization': 'Bearer EAAY5YGNZBIz8BRGZC1vofZABnJFMib30aMXWYpxjcxbODR3EvqBY2q0j7SFYfS4ZCCCs1cpePD0zUlpWB0quL9FiCQZBQ426puW1hzkYmU0Lm5bbtfQ745qUpSXkk2M7Gc9rZATfAyK3bTsjZCb8ztoM2RRKXAhiyZAnX7tQLy8etsBNvJwxf6rFZAZC3QnCJiRlcHvZCqG5n0qZBWq6I5iyH45o6Av8jIZCdLZA4umdsfAaIEF2Vq6FKDZBMKAfspDnnyrffWPlTNVZCoo2MnUWgmxCm84o'
     }
     connection = http.client.HTTPSConnection('graph.facebook.com')
     try:
