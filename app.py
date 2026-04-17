@@ -155,8 +155,11 @@ def manejar_boton(numero, opcion_id):
 
     # Selección de fecha
     elif opcion_id.startswith('fecha_'):
-        fecha_elegida = opcion_id.replace('fecha_', '').replace('_', ' ')
-        confirmar_cita(numero, fecha_elegida)
+    # Recuperar la fecha real desde la sesión
+         sesion = sesiones.get(numero, {})
+         fechas = sesion.get('fechas', {})
+         fecha_elegida = fechas.get(opcion_id, opcion_id)
+         confirmar_cita(numero, fecha_elegida)
 
     # Confirmar cancelación
     elif opcion_id == 'si_cancelar':
@@ -204,18 +207,17 @@ def manejar_texto(numero, texto):
 
 def mostrar_fechas_disponibles(numero):
     dias = obtener_proximos_dias_habiles()
-    enviar_texto(numero, "📆 Selecciona una de las siguientes fechas disponibles:")
-
-    # WhatsApp solo permite 3 botones máximo — perfecto
     botones = []
     for i, dia in enumerate(dias):
         botones.append({
             "type": "reply",
             "reply": {
-                "id": f"fecha_{dia.replace(' ', '_')}",
-                "title": dia[:20]  # máximo 20 caracteres por botón
+                "id": f"fecha_{i+1}",        # ✅ id simple: fecha_1, fecha_2, fecha_3
+                "title": dia[:20]
             }
         })
+    # Guardar el mapa id -> fecha en la sesión
+    sesiones[numero]['fechas'] = {f"fecha_{i+1}": dia for i, dia in enumerate(dias)}
 
     data = {
         "messaging_product": "whatsapp",
@@ -224,7 +226,7 @@ def mostrar_fechas_disponibles(numero):
         "type": "interactive",
         "interactive": {
             "type": "button",
-            "body": {"text": "Elige tu fecha:"},
+            "body": {"text": "Elige tu fecha disponible:"},
             "action": {"buttons": botones}
         }
     }
@@ -276,7 +278,6 @@ def buscar_y_cancelar_cita(numero, documento):
             'paso': 'confirmar',
             'cita_id': cita.id
         }
-
         data = {
             "messaging_product": "whatsapp",
             "recipient_type": "individual",
@@ -285,22 +286,19 @@ def buscar_y_cancelar_cita(numero, documento):
             "interactive": {
                 "type": "button",
                 "body": {
-                    "text": f"Encontré tu cita:\n\n"
-                            f"👤 {cita.nombre}\n"
-                            f"📅 {cita.fecha_cita}\n\n"
-                            f"¿Deseas cancelarla?"
+                    "text": f"Encontre tu cita:\n\nNombre: {cita.nombre}\nFecha: {cita.fecha_cita}\n\nDeseas cancelarla?"  # ✅ sin emojis ni tildes
                 },
                 "action": {
                     "buttons": [
-                        {"type": "reply", "reply": {"id": "si_cancelar", "title": "✅ Sí, cancelar"}},
-                        {"type": "reply", "reply": {"id": "no_cancelar", "title": "❌ No, mantener"}}
+                        {"type": "reply", "reply": {"id": "si_cancelar", "title": "Si, cancelar"}},
+                        {"type": "reply", "reply": {"id": "no_cancelar", "title": "No, mantener"}}
                     ]
                 }
             }
         }
         enviar_request(data)
     else:
-        enviar_texto(numero, "⚠️ No encontré ninguna cita activa con ese documento.")
+        enviar_texto(numero, "No encontre ninguna cita activa con ese documento.")
         del sesiones[numero]
         enviar_menu(numero)
 
