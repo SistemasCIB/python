@@ -60,9 +60,9 @@ sesiones = {}
 
 # ─────────────────────────────────────────────
 # CONFIGURACIÓN
-# ─────────────────────────────────────────────
+# ────────────────────────────────────────────
 TOKEN_ANDERCODE = "ANDERCODE"
-TOKEN_META = "EAAY5YGNZBIz8BRAA2HEZAMXXNHAIFgXaHsjHN7lEkPTBqCS9GeYj2rnCpndaCfHbJyBZAq3VXKLZBLOJZB0EUPOr02vhLmOgTy030NHicjHbhI0q4loqcXhVTZA6mfO777MESA46eWj9uyku36xPuLqdfZCKuNwDhKay7fK0pUjhnqlAQcEFRtUZBxoFZAncIWsJacMNxX8KFG8jAg9U4VkNAybq3nu8i4dYzaIl58n4q1Dl9AFNk7F86QcpZAZA28pl44crcT7WqSSikZBPpkK8KaaT"
+TOKEN_META = "EAAY5YGNZBIz8BRAjKyKpEXAuVOPyfYNitaGXr1Ae5bSnu5LZBXDhUQ9pjUR81KSO4OJ5Imk5yOPURdMJzdCb961WrcpdHqDjbMrOEtORhU28bU03q8JfRfD1MKkQvZB26iVh2ey604MPpaaEfMJJLZCRZBdwVGLLFfO7pcHBm0cVisfJI1oZB5wbdFwAqqvoaxJNVAT46WdLrbX2dVgVdqHZBByd24HwNXpTqr02YbjaCkjs1twOl7AZBhjVZBjLrLuyvVOM3417FTDiZCZC6vMt144"
 PHONE_NUMBER_ID = "1112533955267866"
 NUMERO_ASESOR = "573001234567" 
 # ─────────────────────────────────────────────
@@ -357,7 +357,7 @@ def enviar_texto(numero, mensaje):
 def enviar_request(data):
     headers = {
         'Content-Type': 'application/json',
-        'Authorization': 'BearerEAAY5YGNZBIz8BRAA2HEZAMXXNHAIFgXaHsjHN7lEkPTBqCS9GeYj2rnCpndaCfHbJyBZAq3VXKLZBLOJZB0EUPOr02vhLmOgTy030NHicjHbhI0q4loqcXhVTZA6mfO777MESA46eWj9uyku36xPuLqdfZCKuNwDhKay7fK0pUjhnqlAQcEFRtUZBxoFZAncIWsJacMNxX8KFG8jAg9U4VkNAybq3nu8i4dYzaIl58n4q1Dl9AFNk7F86QcpZAZA28pl44crcT7WqSSikZBPpkK8KaaT' 
+        'Authorization': 'bearer EAAY5YGNZBIz8BRAjKyKpEXAuVOPyfYNitaGXr1Ae5bSnu5LZBXDhUQ9pjUR81KSO4OJ5Imk5yOPURdMJzdCb961WrcpdHqDjbMrOEtORhU28bU03q8JfRfD1MKkQvZB26iVh2ey604MPpaaEfMJJLZCRZBdwVGLLFfO7pcHBm0cVisfJI1oZB5wbdFwAqqvoaxJNVAT46WdLrbX2dVgVdqHZBByd24HwNXpTqr02YbjaCkjs1twOl7AZBhjVZBjLrLuyvVOM3417FTDiZCZC6vMt144' 
     }
     connection = http.client.HTTPSConnection('graph.facebook.com')
     try:
