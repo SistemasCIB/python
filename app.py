@@ -53,79 +53,67 @@ def verificar_token(request):
 def recibir_mensaje(request):
     try:
         req = request.get_json()
-        #agregar_mensajes_log(f"Request recibido: {json.dumps(req)}")  # 👈 log del request
+        agregar_mensajes_log(f"Request recibido: {json.dumps(req)}")  # 👈 log del request
 
         entry = req.get('entry', [])
-       # if not entry:
-        #    return jsonify({'message': 'EVENT_RECEIVED'})
+        if not entry:
+            return jsonify({'message': 'EVENT_RECEIVED'})
 
-        changes = entry['changes'][0]  
-        #if not changes:
-         #   return jsonify({'message': 'EVENT_RECEIVED'})
+        changes = entry[0].get('changes', [])  # ✅ corregido
+        if not changes:
+            return jsonify({'message': 'EVENT_RECEIVED'})
 
-        value = changes['value']
-        objeto_messages = value('messages')
+        value = changes[0].get('value', {})
+        objeto_messages = value.get('messages', [])
 
         if objeto_messages:
             messages = objeto_messages[0]
-           
-            if "type" in messages:
-                tipo = messages["type"]
-                
-                if tipo == "interactive":
-                    return 0
+            tipo = messages.get('type')
 
-                if 'text' in messages:
-                    text = messages["text"]["body"]
-                    numero = messages["from"]
-                    agregar_mensajes_log(json.dumps(text))  # ✅ guarda en BD
-                    enviar_mensajes(text, numero)
+            if tipo == 'interactive':
+                return jsonify({'message': 'EVENT_RECEIVED'})
+
+            if tipo == 'text':
+                text = messages["text"]["body"]
+                numero = messages["from"]
+                agregar_mensajes_log(f"Mensaje de {numero}: {text}")  # ✅ guarda en BD
+                enviar_mensajes(text, numero)
 
         return jsonify({'message': 'EVENT_RECEIVED'})
     except Exception as e:
+        agregar_mensajes_log(f"Error: {str(e)}")  # ✅ guarda errores también
         return jsonify({'message': 'EVENT_RECEIVED'})
 
 def enviar_mensajes(texto, number):
     texto = texto.lower()
     if "hola" in texto:
-        data={
-            "messaging_product": "whatsapp",
-            "recipient_type": "individual",
-            "to": number,
-            "type": "text", 
-            "text": {
-                "preview_url": False,
-                "body": "¡Hola! ¿En qué puedo ayudarte hoy?"
-            }            
-        }
+        body = "Hola, gracias por tu mensaje. ¿En qué puedo ayudarte?"
     else:
-        if "hola" in texto:
-         data={
-            "messaging_product": "whatsapp",
-            "recipient_type": "individual",
-            "to": number,
-            "type": "text", 
-            "text": {
-                "preview_url": False,
-                "body": "menu opciones"
-            }            
+        body = "No entiendo tu mensaje, por favor intenta con otra cosa."
+
+    data = json.dumps({
+        "messaging_product": "whatsapp",
+        "recipient_type": "individual",
+        "to": number,
+        "type": "text",
+        "text": {
+            "preview_url": False,
+            "body": body
         }
-    #convertir a json    
-    data = json.dumps(data)
+    })
 
     headers = {
-            'Content-Type': 'application/json', 
-            'Authorization': 'Bearer EAAY5YGNZBIz8BRAA2HEZAMXXNHAIFgXaHsjHN7lEkPTBqCS9GeYj2rnCpndaCfHbJyBZAq3VXKLZBLOJZB0EUPOr02vhLmOgTy030NHicjHbhI0q4loqcXhVTZA6mfO777MESA46eWj9uyku36xPuLqdfZCKuNwDhKay7fK0pUjhnqlAQcEFRtUZBxoFZAncIWsJacMNxX8KFG8jAg9U4VkNAybq3nu8i4dYzaIl58n4q1Dl9AFNk7F86QcpZAZA28pl44crcT7WqSSikZBPpkK8KaaT'
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer EAAY5YGNZBIz8BRAA2HEZAMXXNHAIFgXaHsjHN7lEkPTBqCS9GeYj2rnCpndaCfHbJyBZAq3VXKLZBLOJZB0EUPOr02vhLmOgTy030NHicjHbhI0q4loqcXhVTZA6mfO777MESA46eWj9uyku36xPuLqdfZCKuNwDhKay7fK0pUjhnqlAQcEFRtUZBxoFZAncIWsJacMNxX8KFG8jAg9U4VkNAybq3nu8i4dYzaIl58n4q1Dl9AFNk7F86QcpZAZA28pl44crcT7WqSSikZBPpkK8KaaT'
     }
+
     connection = http.client.HTTPSConnection('graph.facebook.com')
     try:
         connection.request('POST', '/v25.0/1112533955267866/messages', data, headers)
         response = connection.getresponse()
-        print(response.status, response.reason)
-
+        agregar_mensajes_log(f"Respuesta Meta: {response.status} {response.reason}")
     except Exception as e:
-        agregar_mensajes_log(json.dumps(e)) 
-
+        agregar_mensajes_log(f"Error al enviar: {str(e)}")
     finally:
         connection.close()
 
