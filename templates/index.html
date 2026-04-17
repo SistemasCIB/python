@@ -3,51 +3,280 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Log de Mensajes</title>
+    <title>CIB - Panel de Control</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
         body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 20px;
-            background-color: #f5f5f5;
+            font-family: 'Inter', sans-serif;
+            background: #f0f2f5;
+            color: #1a1a2e;
         }
-        h1 {
+
+        header {
+            background: #1a1a2e;
+            color: white;
+            padding: 20px 40px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        header h1 { font-size: 18px; font-weight: 600; }
+        header span { font-size: 13px; color: #8892b0; margin-top: 2px; display: block; }
+
+        .tabs {
+            background: white;
+            border-bottom: 1px solid #e0e0e0;
+            padding: 0 40px;
+            display: flex;
+            gap: 4px;
+        }
+        .tab {
+            padding: 14px 20px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            color: #666;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s;
+        }
+        .tab:hover { color: #1a1a2e; }
+        .tab.active { color: #1a1a2e; border-bottom-color: #1a1a2e; }
+
+        .content { padding: 30px 40px; }
+
+        .tab-panel { display: none; }
+        .tab-panel.active { display: block; }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        .stat-card {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            border: 1px solid #e0e0e0;
+        }
+        .stat-card .label { font-size: 12px; color: #888; text-transform: uppercase; letter-spacing: 0.5px; }
+        .stat-card .value { font-size: 28px; font-weight: 600; margin-top: 6px; color: #1a1a2e; }
+
+        .table-wrapper {
+            background: white;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+            overflow: hidden;
+        }
+        .table-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .table-header h2 { font-size: 15px; font-weight: 600; }
+        .badge {
+            background: #f0f2f5;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            color: #555;
+        }
+
+        table { width: 100%; border-collapse: collapse; }
+        th {
+            background: #fafafa;
+            padding: 11px 16px;
+            text-align: left;
+            font-size: 12px;
+            font-weight: 600;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        td {
+            padding: 12px 16px;
+            font-size: 13px;
+            border-bottom: 1px solid #f0f0f0;
             color: #333;
         }
-        p {
-            color: #666;
-            line-height: 1.6;
+        tr:last-child td { border-bottom: none; }
+        tr:hover td { background: #fafafa; }
+
+        .pill {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 500;
         }
-        table{
-           width:  80%;
-           border-collapse: collapse;
-           margin: 20px auto;
-        }
-        th, td {
-            border: 1px solid #ddd;
-            padding: 8px;
-            text-align: left;
+        .pill.activa   { background: #e6f7ef; color: #1a7a4a; }
+        .pill.cancelada { background: #fdecea; color: #c0392b; }
+        .pill.acepto   { background: #e6f7ef; color: #1a7a4a; }
+        .pill.rechazo  { background: #fdecea; color: #c0392b; }
+
+        .empty {
+            text-align: center;
+            padding: 40px;
+            color: #aaa;
+            font-size: 14px;
         }
     </style>
 </head>
 <body>
-    <h1>registro de mensajes</h1>
 
-    <table>
-        
-            <tr>
-                <th>Fecha y Hora</th>
-                <th>Mensaje</th>
-            </tr>
-             {% for registro in registros %}
-               <tr>
-                    <td>{{ registro.fecha_y_hora }}</td>
-                    <td>{{ registro.texto }}</td>
-               </tr>
-             {% endfor %}
-        
-  
-    </table>
-    <p>Puedes agregar más contenido aquí.</p>
+<header>
+    <div>
+        <h1>Corporacion para Investigaciones Biologicas</h1>
+        <span>Panel de Control — WhatsApp Bot</span>
+    </div>
+</header>
+
+<div class="tabs">
+    <div class="tab active" onclick="mostrarTab('logs', this)">Mensajes</div>
+    <div class="tab" onclick="mostrarTab('citas', this)">Citas</div>
+    <div class="tab" onclick="mostrarTab('consentimientos', this)">Consentimientos</div>
+</div>
+
+<div class="content">
+
+    <!-- ── MENSAJES ── -->
+    <div class="tab-panel active" id="tab-logs">
+        <div class="stats">
+            <div class="stat-card">
+                <div class="label">Total mensajes</div>
+                <div class="value">{{ registros|length }}</div>
+            </div>
+            <div class="stat-card">
+                <div class="label">Citas activas</div>
+                <div class="value">{{ citas|selectattr('estado', 'equalto', 'activa')|list|length }}</div>
+            </div>
+            <div class="stat-card">
+                <div class="label">Consentimientos</div>
+                <div class="value">{{ consentimientos|selectattr('acepto', 'equalto', True)|list|length }}</div>
+            </div>
+        </div>
+
+        <div class="table-wrapper">
+            <div class="table-header">
+                <h2>Registro de Mensajes</h2>
+                <span class="badge">{{ registros|length }} registros</span>
+            </div>
+            {% if registros %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>Fecha y Hora</th>
+                        <th>Mensaje</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for r in registros %}
+                    <tr>
+                        <td style="white-space:nowrap; color:#888;">{{ r.fecha_y_hora.strftime('%d/%m/%Y %H:%M:%S') }}</td>
+                        <td>{{ r.texto }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div class="empty">No hay mensajes registrados aun.</div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- ── CITAS ── -->
+    <div class="tab-panel" id="tab-citas">
+        <div class="table-wrapper">
+            <div class="table-header">
+                <h2>Citas Agendadas</h2>
+                <span class="badge">{{ citas|length }} registros</span>
+            </div>
+            {% if citas %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Documento</th>
+                        <th>Telefono</th>
+                        <th>Fecha Cita</th>
+                        <th>WhatsApp</th>
+                        <th>Estado</th>
+                        <th>Registrada</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for c in citas %}
+                    <tr>
+                        <td><strong>{{ c.nombre }}</strong></td>
+                        <td>{{ c.documento }}</td>
+                        <td>{{ c.telefono }}</td>
+                        <td>{{ c.fecha_cita }}</td>
+                        <td style="color:#888;">{{ c.numero_whatsapp }}</td>
+                        <td><span class="pill {{ c.estado }}">{{ c.estado }}</span></td>
+                        <td style="color:#888;">{{ c.creada_en.strftime('%d/%m/%Y %H:%M') }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div class="empty">No hay citas registradas aun.</div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- ── CONSENTIMIENTOS ── -->
+    <div class="tab-panel" id="tab-consentimientos">
+        <div class="table-wrapper">
+            <div class="table-header">
+                <h2>Consentimientos de Datos</h2>
+                <span class="badge">{{ consentimientos|length }} registros</span>
+            </div>
+            {% if consentimientos %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>WhatsApp</th>
+                        <th>Decision</th>
+                        <th>Fecha</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for con in consentimientos %}
+                    <tr>
+                        <td>{{ con.numero_whatsapp }}</td>
+                        <td>
+                            {% if con.acepto %}
+                                <span class="pill acepto">Acepto</span>
+                            {% else %}
+                                <span class="pill rechazo">Rechazo</span>
+                            {% endif %}
+                        </td>
+                        <td style="color:#888;">{{ con.fecha.strftime('%d/%m/%Y %H:%M:%S') }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div class="empty">No hay consentimientos registrados aun.</div>
+            {% endif %}
+        </div>
+    </div>
+
+</div>
+
+<script>
+    function mostrarTab(nombre, el) {
+        document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.getElementById('tab-' + nombre).classList.add('active');
+        el.classList.add('active');
+    }
+</script>
+
 </body>
 </html>
