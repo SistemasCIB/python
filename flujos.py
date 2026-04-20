@@ -1,36 +1,50 @@
-from models import db, Log, Cita, Consentimiento, agregar_mensajes_log
+from models import db, Cita, Consentimiento
 from mensajes import enviar_texto, enviar_menu, enviar_bienvenida, mostrar_fechas_disponibles
 from config import NUMERO_ASESOR
-import json
 
 sesiones = {}
 
 def agregar_mensajes_log(texto):
-    nuevo_registro = Log(texto=str(texto))
-    db.session.add(nuevo_registro)
-    db.session.commit()
+    from models import db, Log
+    try:
+        nuevo_registro = Log(texto=str(texto))
+        db.session.add(nuevo_registro)
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        print(f"Error log: {str(e)}")
 
 def manejar_boton(numero, opcion_id):
 
     # ── POLÍTICA DE DATOS ──
     if opcion_id == 'acepto_datos':
-        consentimiento = Consentimiento(numero_whatsapp=numero, acepto=True)
-        db.session.add(consentimiento)
-        db.session.commit()
-        agregar_mensajes_log(f"Consentimiento ACEPTADO: {numero}")
-        enviar_texto(numero, "Gracias por aceptar. Ahora puedes acceder a nuestros servicios.")
-        enviar_menu(numero)
+        from models import db
+        try:
+            consentimiento = Consentimiento(numero_whatsapp=numero, acepto=True)
+            db.session.add(consentimiento)
+            db.session.commit()
+            agregar_mensajes_log(f"Consentimiento ACEPTADO: {numero}")
+            enviar_texto(numero, "Gracias por aceptar. Ahora puedes acceder a nuestros servicios.")
+            enviar_menu(numero)
+        except Exception as e:
+            db.session.rollback()
+            agregar_mensajes_log(f"Error consentimiento: {str(e)}")
 
     elif opcion_id == 'no_acepto_datos':
-        consentimiento = Consentimiento(numero_whatsapp=numero, acepto=False)
-        db.session.add(consentimiento)
-        db.session.commit()
-        agregar_mensajes_log(f"Consentimiento RECHAZADO: {numero}")
-        enviar_texto(numero,
-            "Has rechazado la politica de datos.\n\n"
-            "Lamentablemente no podemos continuar sin tu autorizacion. "
-            "Si cambias de opinion, escribe cualquier mensaje para comenzar de nuevo."
-        )
+        from models import db
+        try:
+            consentimiento = Consentimiento(numero_whatsapp=numero, acepto=False)
+            db.session.add(consentimiento)
+            db.session.commit()
+            agregar_mensajes_log(f"Consentimiento RECHAZADO: {numero}")
+            enviar_texto(numero,
+                "Has rechazado la politica de datos.\n\n"
+                "Lamentablemente no podemos continuar sin tu autorizacion. "
+                "Si cambias de opinion, escribe cualquier mensaje para comenzar de nuevo."
+            )
+        except Exception as e:
+            db.session.rollback()
+            agregar_mensajes_log(f"Error consentimiento: {str(e)}")
 
     # ── MENÚ PRINCIPAL ──
     elif opcion_id == 'agendar':
@@ -47,12 +61,11 @@ def manejar_boton(numero, opcion_id):
             f"Telefono: {NUMERO_ASESOR}\n\nEstara feliz de ayudarte!"
         )
         enviar_menu(numero)
-        
+
     elif opcion_id == 'terminar':
         if numero in sesiones:
-          del sesiones[numero]
-        enviar_texto(numero, "Gracias por contactarnos. Hasta pronto!")    
-        
+            del sesiones[numero]
+        enviar_texto(numero, "Gracias por contactarnos. Hasta pronto!")
 
     # ── SELECCIÓN DE FECHA ──
     elif opcion_id.startswith('fecha_'):
@@ -111,30 +124,35 @@ def manejar_texto(numero, texto):
 
 
 def confirmar_cita(numero, fecha):
+    from models import db
     sesion = sesiones.get(numero, {})
-    nueva_cita = Cita(
-        nombre=sesion.get('nombre', ''),
-        documento=sesion.get('documento', ''),
-        telefono=sesion.get('telefono', ''),
-        fecha_cita=fecha,
-        numero_whatsapp=numero,
-        estado='activa'
-    )
-    db.session.add(nueva_cita)
-    db.session.commit()
-    agregar_mensajes_log(f"Cita agendada: {nueva_cita.nombre} | {fecha}")
-
-    enviar_texto(numero,
-        f"Cita agendada exitosamente!\n\n"
-        f"Nombre: {nueva_cita.nombre}\n"
-        f"Documento: {nueva_cita.documento}\n"
-        f"Telefono: {nueva_cita.telefono}\n"
-        f"Fecha: {fecha}\n\n"
-        f"Te esperamos!"
-    )
-    if numero in sesiones:
-        del sesiones[numero]
-    enviar_menu(numero)
+    try:
+        nueva_cita = Cita(
+            nombre=sesion.get('nombre', ''),
+            documento=sesion.get('documento', ''),
+            telefono=sesion.get('telefono', ''),
+            fecha_cita=fecha,
+            numero_whatsapp=numero,
+            estado='activa'
+        )
+        db.session.add(nueva_cita)
+        db.session.commit()
+        agregar_mensajes_log(f"Cita agendada: {nueva_cita.nombre} | {fecha}")
+        enviar_texto(numero,
+            f"Cita agendada exitosamente!\n\n"
+            f"Nombre: {nueva_cita.nombre}\n"
+            f"Documento: {nueva_cita.documento}\n"
+            f"Telefono: {nueva_cita.telefono}\n"
+            f"Fecha: {fecha}\n\n"
+            f"Te esperamos!"
+        )
+    except Exception as e:
+        db.session.rollback()
+        agregar_mensajes_log(f"Error cita: {str(e)}")
+    finally:
+        if numero in sesiones:
+            del sesiones[numero]
+        enviar_menu(numero)
 
 
 def buscar_y_cancelar_cita(numero, documento):
@@ -167,15 +185,21 @@ def buscar_y_cancelar_cita(numero, documento):
 
 
 def ejecutar_cancelacion(numero):
+    from models import db
     sesion = sesiones.get(numero, {})
     cita = Cita.query.get(sesion.get('cita_id'))
-    if cita:
-        cita.estado = 'cancelada'
-        db.session.commit()
-        agregar_mensajes_log(f"Cita cancelada: {cita.nombre} | {cita.fecha_cita}")
-        enviar_texto(numero, f"Tu cita del {cita.fecha_cita} ha sido cancelada correctamente.")
-    else:
-        enviar_texto(numero, "No se pudo cancelar la cita.")
-    if numero in sesiones:
-        del sesiones[numero]
-    enviar_menu(numero)
+    try:
+        if cita:
+            cita.estado = 'cancelada'
+            db.session.commit()
+            agregar_mensajes_log(f"Cita cancelada: {cita.nombre} | {cita.fecha_cita}")
+            enviar_texto(numero, f"Tu cita del {cita.fecha_cita} ha sido cancelada correctamente.")
+        else:
+            enviar_texto(numero, "No se pudo cancelar la cita.")
+    except Exception as e:
+        db.session.rollback()
+        agregar_mensajes_log(f"Error cancelacion: {str(e)}")
+    finally:
+        if numero in sesiones:
+            del sesiones[numero]
+        enviar_menu(numero)
