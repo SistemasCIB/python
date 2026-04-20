@@ -7,7 +7,7 @@ def enviar_request(data):
         'Content-Type': 'application/json',
         'Authorization': 'Bearer EAAY5YGNZBIz8BReVhSsbe22y0cZBgbDPYjwyRmwTB9WS1HPIgiGaIlUnlQo1Kwm82SnC8eE1moJFMoWJpj76lOzXdwFPbFFfzVmqMC1v4NZBIk1oxZA480AMTtPiR1pvobDvDVo0t8pvZBV9nUkJnLqa1swhFp7Ld2ZAw6RhOXXAt0ppZAy4iMZAaeaQgdFD9owjdMFwZAGDy6BA2ZAhVDHJtWlIxeVvYHAejtwkGtzKX6xSnHWguZC3AIcZCXc6FYx1lBXuN0haFjzQMe3huZC2mliyP'
     }
-    connection = http.client.HTTPSConnection('graph.fac ebook.com')
+    connection = http.client.HTTPSConnection('graph.facebook.com')
     try:
         connection.request('POST', f'/v25.0/{PHONE_NUMBER_ID}/messages', json.dumps(data), headers)
         response = connection.getresponse()
@@ -37,17 +37,23 @@ def enviar_menu(numero):
         "to": numero,
         "type": "interactive",
         "interactive": {
-            "type": "button",
-            "body": {"text": "En que podemos ayudarte?"},
+            "type": "list",
+            "body": {"text": "En que podemos ayudarte hoy?"},
             "action": {
-                "buttons": [
-                    {"type": "reply", "reply": {"id": "agendar",  "title": "Agendar Cita"}},
-                    {"type": "reply", "reply": {"id": "cancelar", "title": "Cancelar Cita"}},
-                    {"type": "reply", "reply": {"id": "asesoria", "title": "Asesoria"}}
-                ]
+                "button": "Ver opciones",
+                "sections": [{
+                    "title": "Menu principal",
+                    "rows": [
+                        {"id": "agendar",  "title": "Agendar Cita",  "description": "Programa una nueva cita"},
+                        {"id": "cancelar", "title": "Cancelar Cita", "description": "Cancela una cita existente"},
+                        {"id": "asesoria", "title": "Asesoria",      "description": "Habla con un asesor"},
+                        {"id": "terminar", "title": "Finalizar",     "description": "Terminar la conversacion"}
+                    ]
+                }]
             }
         }
     }
+    enviar_request(data)
     enviar_request(data)
 
 def enviar_bienvenida(numero):
