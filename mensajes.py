@@ -6,7 +6,7 @@ from config import TOKEN_META, PHONE_NUMBER_ID
 def enviar_request(data):
     headers = {
         'Content-Type': 'application/json',
-        'Authorization': 'Bearer EAAY5YGNZBIz8BRcwoZCblE26DD5JD6hdAthLx3T1rOmjSReLpPJGNH8FJ2lM3jfBZAkb4Lb9fv8XoNJWlpxH94ZB4w9MYBXKpX7c1nBpsJt2RlSMT542MEmkRlHGrNZCIqSOZC7UcxEZBQcms0t3lKMPv7fglGyf7iRWpmq2zZCiBpvwZCZCVJZBqyMx1UJoqTIIZASkNQeJFxu00qBL995k5ZC718XA5siV1GwdohU7wSRnsSgzlXdKFmxceZCaYZCaLth5PeuCUwB4kyCCSnUBzLP0Vb3RQZDZD' 
+        'Authorization': 'Bearer EAAY5YGNZBIz8BRcwoZCblE26DD5JD6hdAthLx3T1rOmjSReLpPJGNH8FJ2lM3jfBZAkb4Lb9fv8XoNJWlpxH94ZB4w9MYBXKpX7c1nBpsJt2RlSMT542MEmkRlHGrNZCIqSOZC7UcxEZBQcms0t3lKMPv7fglGyf7iRWpmq2zZCiBpvwZCZCVJZBqyMx1UJoqTIIZASkNQeJFxu00qBL995k5ZC718XA5siV1GwdohU7wSRnsSgzlXdKFmxceZCaYZCaLth5PeuCUwB4kyCCSnUBzLP0Vb3RQZDZD'
     }
     connection = http.client.HTTPSConnection('graph.facebook.com')
     try:
