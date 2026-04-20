@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify
-from models import db, Log
+from models import db, Log, agregar_mensajes_log
 from flujos import manejar_boton, manejar_texto, agregar_mensajes_log
 from config import TOKEN_ANDERCODE
 import json
