@@ -1,7 +1,8 @@
 from flask import Flask, render_template, send_from_directory
-from models import db, Log
+from models import db, Log, ordenar_por_fecha_y_hora
 from webhook import webhook_bp
 from datetime import datetime
+
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///metapython.db'
@@ -18,8 +19,10 @@ def ordenar_registros_por_fecha(registros):
 
 @app.route('/')
 def index():
+    #obtener todos los registros ed la base de datos
     registros = Log.query.all()
-    return render_template('index.html', registros=ordenar_registros_por_fecha(registros))
+    registros_ordenados = ordenar_por_fecha_y_hora(registros)
+    return render_template('index.html',registros=registros_ordenados)
 
 @app.route('/politica')
 def politica():
