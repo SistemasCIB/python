@@ -6,7 +6,7 @@ from models import agregar_mensajes_log
 def enviar_request(data):
     headers = {
         'Content-Type': 'application/json',
-        'Authorization': 'Bearer EAAY5YGNZBIz8BRQImDjgZBaQANsrFZChVAyyArIFWOpfZB7ETDZCh12FtFppnYfvRZCqGlYXZBCHJHntFOfj9WEqKIElOhP3x2fkIZBds1A7GQNrWfqGXTz2SQdxytIh2ZBvPdOMQbkQHzLHKGaBHOsv09J8ZBVozh211IW9GMWCsJfoEoQaJpBSw6HuZAiaPxr3VlcutMuSfr3v7prmohfJVU5IcAM9A6FnZAZAeoPWOm4f7QswQA1vUlLK7XQd0dY9FRn4IY9ihVUct7nCqXczOVHKY'
+        'Authorization': 'Bearer EAAY5YGNZBIz8BRXwA8UTEa16UrRYq3UZAoinyvHxjyXzLsaGAfimXp6qWUD4ZBlMOMywI3nTV3Oet56Ov2L697IbfXA6l8FOwpNvUoXtM0iwS8INTFrq7mpEKBB9rLq3kJXgzRQlv9Ffd2q8ZCRZC8XVYR0opra2ydz68qEfHmCBs0F9ie4AcYtYEGEpDEQZDZD'
     }
     connection = http.client.HTTPSConnection('graph.facebook.com')
     try:
@@ -53,7 +53,7 @@ def enviar_menu(numero):
         }
     }
     enviar_request(data)
-    enviar_request(data)
+   
 
 def enviar_bienvenida(numero):
     from config import URL_BASE
