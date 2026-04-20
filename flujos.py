@@ -1,6 +1,6 @@
 from models import db, Cita, Consentimiento, agregar_mensajes_log
 from mensajes import enviar_texto, enviar_menu, enviar_bienvenida, mostrar_fechas_disponibles
-from config import NUMERO_ASESOR
+from config import LINK_ASESOR
 
 sesiones = {}
 
@@ -48,8 +48,8 @@ def manejar_boton(numero, opcion_id):
 
     elif opcion_id == 'asesoria':
         enviar_texto(numero,
-            f"Asesoria\n\nTe comunico con uno de nuestros asesores:\n\n"
-            f"Telefono: {NUMERO_ASESOR}\n\nEstara feliz de ayudarte!"
+            f"Asesoria\n\nHaz clic en el siguiente enlace para chatear directamente con uno de nuestros asesores:\n\n"
+            f"Telefono: {LINK_ASESOR}\n\nEstara feliz de ayudarte!"
         )
         enviar_menu(numero)
 
