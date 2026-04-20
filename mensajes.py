@@ -1,6 +1,7 @@
 import http.client
 import json
 from config import TOKEN_META, PHONE_NUMBER_ID
+from flujos import agregar_mensajes_log
 
 def enviar_request(data):
     headers = {
@@ -11,12 +12,10 @@ def enviar_request(data):
     try:
         connection.request('POST', f'/v25.0/{PHONE_NUMBER_ID}/messages', json.dumps(data), headers)
         response = connection.getresponse()
-        from models import db, Log
-        nuevo_log = Log(texto=f"Meta: {response.status} {response.reason}")
-        db.session.add(nuevo_log)
-        db.session.commit()
+        if response.status != 200:
+            agregar_mensajes_log(f"Error envio | {response.status} {response.reason}")
     except Exception as e:
-        print(f"Error al enviar: {str(e)}")
+           agregar_mensajes_log(f"Error envio: {str(e)}")
     finally:
         connection.close()
 

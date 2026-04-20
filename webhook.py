@@ -23,7 +23,7 @@ def verificar_token(req):
 def recibir_mensaje(req):
     try:
         data = req.get_json()
-        agregar_mensajes_log(f"Request: {json.dumps(data)}")
+        
 
         entry = data.get('entry', [])
         if not entry:
@@ -45,13 +45,22 @@ def recibir_mensaje(req):
                 tipo_interactive = mensaje.get('interactive', {}).get('type', '')
                 if tipo_interactive == 'list_reply':
                     opcion_id = mensaje.get('interactive', {}).get('list_reply', {}).get('id', '')
+                    titulo = mensaje.get('interactive', {}).get('list_reply', {}).get('title', '')
                 else:
                     opcion_id = mensaje.get('interactive', {}).get('button_reply', {}).get('id', '')
+                    titulo = mensaje.get('interactive', {}).get('button_reply', {}).get('title', '')
+
+                agregar_mensajes_log(f"Boton presionado | {numero} | {titulo}")
                 manejar_boton(numero, opcion_id)
 
             elif tipo == 'text':
                 texto = mensaje['text']['body']
-                agregar_mensajes_log(f"Mensaje de {numero}: {texto}")
+                nombre = objeto_messages[0].get('from', '')
+               # obtener nombre del contacto
+                contactos = value.get('contacts', [])
+                nombre = contactos[0].get('profile', {}).get('name', 'Desconocido') if contactos else 'Desconocido'
+               # log limpio
+                agregar_mensajes_log(f"Mensaje | {nombre} | {numero} | {texto}")
                 manejar_texto(numero, texto)
 
         return jsonify({'message': 'EVENT_RECEIVED'})
