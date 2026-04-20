@@ -18,15 +18,8 @@ def ordenar_registros_por_fecha(registros):
 
 @app.route('/')
 def index():
-    from models import Cita, Consentimiento
-    registros = ordenar_registros_por_fecha(Log.query.all())
-    citas = Cita.query.order_by(Cita.creada_en.desc()).all()
-    consentimientos = Consentimiento.query.order_by(Consentimiento.fecha.desc()).all()
-    return render_template('index.html',
-        registros=registros,
-        citas=citas,
-        consentimientos=consentimientos
-    )
+    registros = Log.query.all()
+    return render_template('index.html', registros=ordenar_registros_por_fecha(registros))
 
 @app.route('/politica')
 def politica():

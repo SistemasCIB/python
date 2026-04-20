@@ -1,4 +1,3 @@
-#rutas Flask
 from flask import Blueprint, request, jsonify
 from models import db, Log
 from flujos import manejar_boton, manejar_texto, agregar_mensajes_log

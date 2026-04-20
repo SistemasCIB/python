@@ -1,4 +1,3 @@
-#logica de conversacion
 from models import db, Log, Cita, Consentimiento
 from mensajes import enviar_texto, enviar_menu, enviar_bienvenida, mostrar_fechas_disponibles
 from config import NUMERO_ASESOR
