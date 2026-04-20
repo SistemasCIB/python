@@ -30,7 +30,7 @@ def index():
 
 @app.route('/politica')
 def politica():
-    return send_from_directory('static', 'Politica_tratamiento_protecion_datos.pdf')
+    return send_from_directory('static', 'politica_datos.pdf')
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=80, debug=True)

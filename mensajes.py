@@ -6,7 +6,7 @@ from config import TOKEN_META, PHONE_NUMBER_ID
 def enviar_request(data):
     headers = {
         'Content-Type': 'application/json',
-        'Authorization': 'Bearer EAAY5YGNZBIz8BRcwoZCblE26DD5JD6hdAthLx3T1rOmjSReLpPJGNH8FJ2lM3jfBZAkb4Lb9fv8XoNJWlpxH94ZB4w9MYBXKpX7c1nBpsJt2RlSMT542MEmkRlHGrNZCIqSOZC7UcxEZBQcms0t3lKMPv7fglGyf7iRWpmq2zZCiBpvwZCZCVJZBqyMx1UJoqTIIZASkNQeJFxu00qBL995k5ZC718XA5siV1GwdohU7wSRnsSgzlXdKFmxceZCaYZCaLth5PeuCUwB4kyCCSnUBzLP0Vb3RQZDZD ' 
+        'Authorization': 'Bearer EAAY5YGNZBIz8BRcwoZCblE26DD5JD6hdAthLx3T1rOmjSReLpPJGNH8FJ2lM3jfBZAkb4Lb9fv8XoNJWlpxH94ZB4w9MYBXKpX7c1nBpsJt2RlSMT542MEmkRlHGrNZCIqSOZC7UcxEZBQcms0t3lKMPv7fglGyf7iRWpmq2zZCiBpvwZCZCVJZBqyMx1UJoqTIIZASkNQeJFxu00qBL995k5ZC718XA5siV1GwdohU7wSRnsSgzlXdKFmxceZCaYZCaLth5PeuCUwB4kyCCSnUBzLP0Vb3RQZDZD' 
     }
     connection = http.client.HTTPSConnection('graph.facebook.com')
     try:
@@ -38,23 +38,17 @@ def enviar_menu(numero):
         "to": numero,
         "type": "interactive",
         "interactive": {
-            "type": "list",
-            "body": {"text": "En que podemos ayudarte hoy?"},
+            "type": "button",
+            "body": {"text": "En que podemos ayudarte?"},
             "action": {
-                "button": "Ver opciones",
-                "sections": [{
-                    "title": "Menu principal",
-                    "rows": [
-                        {"id": "agendar",   "title": "Agendar Cita",   "description": "Programa una nueva cita"},
-                        {"id": "cancelar",  "title": "Cancelar Cita",  "description": "Cancela una cita existente"},
-                        {"id": "asesoria",  "title": "Asesoria",       "description": "Habla con un asesor"},
-                        {"id": "terminar",  "title": "Terminar",       "description": "Finalizar conversacion"}
-                    ]
-                }]
+                "buttons": [
+                    {"type": "reply", "reply": {"id": "agendar",  "title": "Agendar Cita"}},
+                    {"type": "reply", "reply": {"id": "cancelar", "title": "Cancelar Cita"}},
+                    {"type": "reply", "reply": {"id": "asesoria", "title": "Asesoria"}}
+                ]
             }
         }
     }
-    enviar_request(data)
     enviar_request(data)
 
 def enviar_bienvenida(numero):
