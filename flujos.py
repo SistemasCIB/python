@@ -47,7 +47,6 @@ def manejar_boton(numero, opcion_id):
             f"Asesoria\n\nTe comunico con uno de nuestros asesores:\n\n"
             f"Telefono: {NUMERO_ASESOR}\n\nEstara feliz de ayudarte!"
         )
-        
         enviar_menu(numero)
 
     # ── SELECCIÓN DE FECHA ──
