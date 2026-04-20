@@ -14,15 +14,24 @@ app.register_blueprint(webhook_bp)
 with app.app_context():
     db.create_all()
 
+@app.teardown_appcontext
+def shutdown_session(exception=None):
+    db.session.remove()
+
 def ordenar_registros_por_fecha(registros):
     return sorted(registros, key=lambda x: x.fecha_y_hora, reverse=True)
 
 @app.route('/')
 def index():
-    #obtener todos los registros ed la base de datos
-    registros = Log.query.all()
-    registros_ordenados = ordenar_por_fecha_y_hora(registros)
-    return render_template('index.html',registros=registros_ordenados)
+    from models import Cita, Consentimiento
+    registros = ordenar_registros_por_fecha(Log.query.all())
+    citas = Cita.query.order_by(Cita.creada_en.desc()).all()
+    consentimientos = Consentimiento.query.order_by(Consentimiento.fecha.desc()).all()
+    return render_template('index.html',
+        registros=registros,
+        citas=citas,
+        consentimientos=consentimientos
+    )
 
 @app.route('/politica')
 def politica():

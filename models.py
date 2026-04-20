@@ -11,8 +11,7 @@ def ordenar_por_fecha_y_hora(registros):
     return sorted(registros, key=lambda x: x.fecha_y_hora,reverse=True)
 
 class Cita(db.Model):
-    __tablename__ = 'citas'
-
+   
     id = db.Column(db.Integer, primary_key=True)
     nombre = db.Column(db.String(100))
     documento = db.Column(db.String(50))
@@ -21,6 +20,7 @@ class Cita(db.Model):
     numero_whatsapp = db.Column(db.String(20))
     estado = db.Column(db.String(20), default='activa')
     creada_en = db.Column(db.DateTime, default=datetime.utcnow)
+
 
 class Consentimiento(db.Model):
     __tablename__ = 'consentimientos'

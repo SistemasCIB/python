@@ -89,7 +89,10 @@ def mostrar_fechas_disponibles(numero, sesiones):
     dia = datetime.now() + timedelta(days=1)
     while len(dias) < 3:
         if dia.weekday() < 5:
-            dias.append(dia.strftime("%A %d de %B"))
+            DIAS_ES = ["Lunes","Martes","Miercoles","Jueves","Viernes","Sabado","Domingo"]
+            MESES_ES = ["","Enero","Febrero","Marzo","Abril","Mayo","Junio",
+                       "Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"]
+            dias.append(f"{DIAS_ES[dia.weekday()]} {dia.day} de {MESES_ES[dia.month]}")
         dia += timedelta(days=1)
 
     botones = []
