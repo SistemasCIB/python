@@ -31,6 +31,10 @@ class Consentimiento(db.Model):
     fecha = db.Column(db.DateTime, default=datetime.utcnow)
 
 def agregar_mensajes_log(texto):
-    nuevo_registro = Log(texto=str(texto))
-    db.session.add(nuevo_registro)
-    db.session.commit()    
+    try:
+        nuevo_registro = Log(texto=str(texto))
+        db.session.add(nuevo_registro)
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        print(f"Error log: {str(e)}")

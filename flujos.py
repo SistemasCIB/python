@@ -1,18 +1,9 @@
-from models import db, Cita, Consentimiento
+from models import db, Cita, Consentimiento, agregar_mensajes_log
 from mensajes import enviar_texto, enviar_menu, enviar_bienvenida, mostrar_fechas_disponibles
 from config import NUMERO_ASESOR
 
 sesiones = {}
 
-def agregar_mensajes_log(texto):
-    from models import db, Log
-    try:
-        nuevo_registro = Log(texto=str(texto))
-        db.session.add(nuevo_registro)
-        db.session.commit()
-    except Exception as e:
-        db.session.rollback()
-        print(f"Error log: {str(e)}")
 
 def manejar_boton(numero, opcion_id):
 

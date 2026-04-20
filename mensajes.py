@@ -1,7 +1,7 @@
 import http.client
 import json
 from config import TOKEN_META, PHONE_NUMBER_ID
-from flujos import agregar_mensajes_log
+from models import agregar_mensajes_log
 
 def enviar_request(data):
     headers = {
