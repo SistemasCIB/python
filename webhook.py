@@ -44,12 +44,13 @@ def recibir_mensaje(req):
             if tipo == 'interactive':
                 interactive = mensaje['interactive']
                 if interactive['type'] == 'list_reply':
-                    opcion_id = interactive('list_reply', {}).get('id')
-                else:
-                    opcion_id = interactive('button_reply', {}).get('id')
-                manejar_boton(numero, opcion_id)    
-                
-            elif tipo == 'text':
+                 opcion_id = interactive.get('list_reply', {}).get('id')
+            else:
+                opcion_id = interactive.get('button_reply', {}).get('id')
+            manejar_boton(numero, opcion_id) 
+            
+
+        elif tipo == 'text':
                 texto = mensaje['text']['body']
                 agregar_mensajes_log(f"Mensaje de {numero}: {texto}")
                 manejar_texto(numero, texto)
