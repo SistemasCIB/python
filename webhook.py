@@ -1,10 +1,9 @@
 #rutas Flask
 from flask import Blueprint, request, jsonify
-from models import db, Log
+from models import db, Cita, Consentimiento, Log
 from flujos import manejar_boton, manejar_texto, agregar_mensajes_log
 from config import TOKEN_ANDERCODE
 import json
-
 webhook_bp = Blueprint('webhook', __name__)
 
 @webhook_bp.route('/webhook', methods=['GET', 'POST'])

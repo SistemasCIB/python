@@ -1,5 +1,5 @@
 #logica de conversacion
-from models import db, Log, Cita, Consentimiento
+from models import db, Log
 from mensajes import enviar_texto, enviar_menu, enviar_bienvenida, mostrar_fechas_disponibles
 from config import NUMERO_ASESOR
 import json
@@ -52,19 +52,16 @@ def manejar_boton(numero, opcion_id):
 
     # ── SELECCIÓN DE FECHA ──
     elif opcion_id.startswith('fecha_'):
-        sesion = sesiones.get(numero, {})
-        fechas = sesion.get('fechas', {})
-        fecha_elegida = fechas.get(opcion_id, opcion_id)
+        fecha_elegida = opcion_id.replace('fecha_', '').replace('_', ' ')
         confirmar_cita(numero, fecha_elegida)
 
-    # ── CONFIRMAR CANCELACIÓN ──
+    # Confirmar cancelación
     elif opcion_id == 'si_cancelar':
         ejecutar_cancelacion(numero)
 
     elif opcion_id == 'no_cancelar':
-        if numero in sesiones:
-            del sesiones[numero]
-        enviar_texto(numero, "Tu cita no fue cancelada.")
+        del sesiones[numero]
+        enviar_texto(numero, "✅ Tu cita *no fue cancelada*. ¡Hasta pronto!")
         enviar_menu(numero)
 
 
