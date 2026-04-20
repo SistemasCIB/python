@@ -38,17 +38,23 @@ def enviar_menu(numero):
         "to": numero,
         "type": "interactive",
         "interactive": {
-            "type": "button",
-            "body": {"text": "En que podemos ayudarte?"},
+            "type": "list",
+            "body": {"text": "En que podemos ayudarte hoy?"},
             "action": {
-                "buttons": [
-                    {"type": "reply", "reply": {"id": "agendar",  "title": "Agendar Cita"}},
-                    {"type": "reply", "reply": {"id": "cancelar", "title": "Cancelar Cita"}},
-                    {"type": "reply", "reply": {"id": "asesoria", "title": "Asesoria"}}
-                ]
+                "button": "Ver opciones",
+                "sections": [{
+                    "title": "Menu principal",
+                    "rows": [
+                        {"id": "agendar",   "title": "Agendar Cita",   "description": "Programa una nueva cita"},
+                        {"id": "cancelar",  "title": "Cancelar Cita",  "description": "Cancela una cita existente"},
+                        {"id": "asesoria",  "title": "Asesoria",       "description": "Habla con un asesor"},
+                        {"id": "terminar",  "title": "Terminar",       "description": "Finalizar conversacion"}
+                    ]
+                }]
             }
         }
     }
+    enviar_request(data)
     enviar_request(data)
 
 def enviar_bienvenida(numero):
