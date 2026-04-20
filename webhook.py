@@ -1,9 +1,10 @@
 #rutas Flask
 from flask import Blueprint, request, jsonify
-from models import db, Cita, Consentimiento, Log
+from models import db, Log
 from flujos import manejar_boton, manejar_texto, agregar_mensajes_log
 from config import TOKEN_ANDERCODE
 import json
+
 webhook_bp = Blueprint('webhook', __name__)
 
 @webhook_bp.route('/webhook', methods=['GET', 'POST'])
@@ -19,6 +20,11 @@ def verificar_token(req):
     if challenge and token == TOKEN_ANDERCODE:
         return challenge
     return jsonify({'error': 'Token invalido'}), 401
+    
+def agregar_mensajes_log(texto):  # 👈 definida aquí directamente
+    nuevo_registro = Log(texto=str(texto))
+    db.session.add(nuevo_registro)
+    db.session.commit()
 
 def recibir_mensaje(req):
     try:
