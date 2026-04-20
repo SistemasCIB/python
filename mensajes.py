@@ -5,9 +5,9 @@ from config import TOKEN_META, PHONE_NUMBER_ID
 def enviar_request(data):
     headers = {
         'Content-Type': 'application/json',
-        'Authorization': 'Bearer EAAY5YGNZBIz8BRSxibmRUFBCO7EpMBoack8SZCk8ZA8YAMWtfFxZCzszJHt4seN7QZCmvyZAROaGkZAZCHsb4ybmedZAHKn3Sqr6zLTcNAvlgkAbZAifwWmj8gflyZAulCsWkboSPZCKXaPwxYByP8JDmpPgHS2DYPamOaHagwuxqwiNpX5ysbdduw9Ycww3U2R50l7gGDXckqES5LDTmDTGrwZBiJAlHWzNqFOd2ZCtAHkiczpWz5S1ldtg1nToChZAjFbzsIVx6VtadeExyq7CB9nYZAAS'
+        'Authorization': 'Bearer EAAY5YGNZBIz8BReVhSsbe22y0cZBgbDPYjwyRmwTB9WS1HPIgiGaIlUnlQo1Kwm82SnC8eE1moJFMoWJpj76lOzXdwFPbFFfzVmqMC1v4NZBIk1oxZA480AMTtPiR1pvobDvDVo0t8pvZBV9nUkJnLqa1swhFp7Ld2ZAw6RhOXXAt0ppZAy4iMZAaeaQgdFD9owjdMFwZAGDy6BA2ZAhVDHJtWlIxeVvYHAejtwkGtzKX6xSnHWguZC3AIcZCXc6FYx1lBXuN0haFjzQMe3huZC2mliyP'
     }
-    connection = http.client.HTTPSConnection('graph.facebook.com')
+    connection = http.client.HTTPSConnection('graph.fac ebook.com')
     try:
         connection.request('POST', f'/v25.0/{PHONE_NUMBER_ID}/messages', json.dumps(data), headers)
         response = connection.getresponse()
