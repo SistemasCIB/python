@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
 from models import db, Log, agregar_mensajes_log
-from flujos import manejar_boton, manejar_texto, agregar_mensajes_log
+from flujos import manejar_boton, manejar_texto
 from config import TOKEN_ANDERCODE
 import json
 
@@ -42,15 +42,14 @@ def recibir_mensaje(req):
             tipo = mensaje.get('type')
 
             if tipo == 'interactive':
-                interactive = mensaje['interactive']
-                if interactive['type'] == 'list_reply':
-                 opcion_id = interactive.get('list_reply', {}).get('id')
-            else:
-                opcion_id = interactive.get('button_reply', {}).get('id')
-            manejar_boton(numero, opcion_id) 
-            
+                tipo_interactive = mensaje.get('interactive', {}).get('type', '')
+                if tipo_interactive == 'list_reply':
+                    opcion_id = mensaje.get('interactive', {}).get('list_reply', {}).get('id', '')
+                else:
+                    opcion_id = mensaje.get('interactive', {}).get('button_reply', {}).get('id', '')
+                manejar_boton(numero, opcion_id)
 
-        elif tipo == 'text':
+            elif tipo == 'text':
                 texto = mensaje['text']['body']
                 agregar_mensajes_log(f"Mensaje de {numero}: {texto}")
                 manejar_texto(numero, texto)
