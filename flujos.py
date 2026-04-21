@@ -1,15 +1,22 @@
+from datetime import datetime
 from models import db, Cita, Consentimiento, agregar_mensajes_log
-from mensajes import enviar_texto, enviar_menu, enviar_bienvenida, mostrar_fechas_disponibles
-from config import LINK_ASESOR
+from mensajes import (enviar_texto, enviar_menu, enviar_bienvenida,
+                      mostrar_fechas_disponibles, enviar_tipo_cita,
+                      enviar_requisitos, enviar_fuera_horario)
+from config import LINK_ASESOR, HORARIO_INICIO, HORARIO_FIN
 
 sesiones = {}
 
+def dentro_de_horario():
+    ahora = datetime.now()
+    if ahora.weekday() >= 5:  # sabado o domingo
+        return False
+    return HORARIO_INICIO <= ahora.hour < HORARIO_FIN
 
 def manejar_boton(numero, opcion_id):
 
     # ── POLÍTICA DE DATOS ──
     if opcion_id == 'acepto_datos':
-        from models import db
         try:
             consentimiento = Consentimiento(numero_whatsapp=numero, acepto=True)
             db.session.add(consentimiento)
@@ -22,7 +29,6 @@ def manejar_boton(numero, opcion_id):
             agregar_mensajes_log(f"Error consentimiento: {str(e)}")
 
     elif opcion_id == 'no_acepto_datos':
-        from models import db
         try:
             consentimiento = Consentimiento(numero_whatsapp=numero, acepto=False)
             db.session.add(consentimiento)
@@ -30,7 +36,6 @@ def manejar_boton(numero, opcion_id):
             agregar_mensajes_log(f"Consentimiento RECHAZADO: {numero}")
             enviar_texto(numero,
                 "Has rechazado la politica de datos.\n\n"
-                "Lamentablemente no podemos continuar sin tu autorizacion. "
                 "Si cambias de opinion, escribe cualquier mensaje para comenzar de nuevo."
             )
         except Exception as e:
@@ -39,17 +44,28 @@ def manejar_boton(numero, opcion_id):
 
     # ── MENÚ PRINCIPAL ──
     elif opcion_id == 'agendar':
-        sesiones[numero] = {'flujo': 'agendar', 'paso': 'nombre'}
-        enviar_texto(numero, "Agendar Cita\n\nPor favor escribe tu nombre completo:")
+        if not dentro_de_horario():
+            enviar_fuera_horario(numero)
+            return
+        enviar_texto(numero,
+            "Para agendar una cita comunicate directamente con uno de nuestros asesores:\n\n"
+            f"{LINK_ASESOR}\n\n"
+            f"Disponibles lunes a viernes de {HORARIO_INICIO}am a {HORARIO_FIN}pm."
+        )
+        enviar_menu(numero)
 
     elif opcion_id == 'cancelar':
         sesiones[numero] = {'flujo': 'cancelar', 'paso': 'documento'}
         enviar_texto(numero, "Cancelar Cita\n\nEscribe tu numero de documento para buscar tu cita:")
 
     elif opcion_id == 'asesoria':
+        if not dentro_de_horario():
+            enviar_fuera_horario(numero)
+            return
         enviar_texto(numero,
-            f"Asesoria\n\nHaz clic en el siguiente enlace para chatear directamente con uno de nuestros asesores:\n\n"
-            f"Telefono: {LINK_ASESOR}\n\nEstara feliz de ayudarte!"
+            f"Te comunico con uno de nuestros asesores:\n\n"
+            f"{LINK_ASESOR}\n\n"
+            f"Disponibles lunes a viernes de {HORARIO_INICIO}am a {HORARIO_FIN}pm."
         )
         enviar_menu(numero)
 
@@ -58,12 +74,39 @@ def manejar_boton(numero, opcion_id):
             del sesiones[numero]
         enviar_texto(numero, "Gracias por contactarnos. Hasta pronto!")
 
+    # ── TIPO DE CITA ──
+    elif opcion_id == 'tipo_presencial':
+        sesiones[numero] = {'flujo': 'agendar', 'paso': 'requisitos', 'tipo_cita': 'presencial'}
+        enviar_requisitos(numero, 'presencial')
+
+    elif opcion_id == 'tipo_domicilio':
+        sesiones[numero] = {'flujo': 'agendar', 'paso': 'requisitos', 'tipo_cita': 'domicilio'}
+        enviar_requisitos(numero, 'domicilio')
+
+    # ── REQUISITOS ──
+    elif opcion_id == 'cumple_si':
+        sesion = sesiones.get(numero, {})
+        sesiones[numero]['paso'] = 'nombre'
+        enviar_texto(numero, "Perfecto! Por favor escribe tu nombre completo:")
+
+    elif opcion_id == 'cumple_no':
+        if numero in sesiones:
+            del sesiones[numero]
+        enviar_texto(numero,
+            "Cuando tengas los requisitos listos, con gusto te agendamos.\n"
+            "Si necesitas ayuda escribe al asesor:"
+            f"\n{LINK_ASESOR}"
+        )
+        enviar_menu(numero)
+
     # ── SELECCIÓN DE FECHA ──
     elif opcion_id.startswith('fecha_'):
         sesion = sesiones.get(numero, {})
         fechas = sesion.get('fechas', {})
         fecha_elegida = fechas.get(opcion_id, opcion_id)
-        confirmar_cita(numero, fecha_elegida)
+        sesiones[numero]['paso'] = 'motivo'
+        sesiones[numero]['fecha_cita'] = fecha_elegida
+        enviar_texto(numero, "Cual es el motivo de tu cita?")
 
     # ── CONFIRMAR CANCELACIÓN ──
     elif opcion_id == 'si_cancelar':
@@ -108,34 +151,39 @@ def manejar_texto(numero, texto):
             sesiones[numero]['paso'] = 'fecha'
             mostrar_fechas_disponibles(numero, sesiones)
 
+        elif paso == 'motivo':
+            sesiones[numero]['motivo'] = texto
+            confirmar_cita(numero)
+
     # ── FLUJO CANCELAR ──
     elif flujo == 'cancelar':
         if paso == 'documento':
             buscar_y_cancelar_cita(numero, texto)
 
 
-def confirmar_cita(numero, fecha):
-    from models import db
+def confirmar_cita(numero):
     sesion = sesiones.get(numero, {})
     try:
         nueva_cita = Cita(
             nombre=sesion.get('nombre', ''),
             documento=sesion.get('documento', ''),
             telefono=sesion.get('telefono', ''),
-            fecha_cita=fecha,
+            tipo_cita=sesion.get('tipo_cita', ''),
+            motivo=sesion.get('motivo', ''),
+            fecha_cita=sesion.get('fecha_cita', ''),
             numero_whatsapp=numero,
-            estado='activa'
+            estado='pendiente'
         )
         db.session.add(nueva_cita)
         db.session.commit()
-        agregar_mensajes_log(f"Cita agendada: {nueva_cita.nombre} | {fecha}")
+        agregar_mensajes_log(f"Cita pendiente: {nueva_cita.nombre} | {nueva_cita.fecha_cita}")
         enviar_texto(numero,
-            f"Cita agendada exitosamente!\n\n"
-            f"Nombre: {nueva_cita.nombre}\n"
-            f"Documento: {nueva_cita.documento}\n"
-            f"Telefono: {nueva_cita.telefono}\n"
-            f"Fecha: {fecha}\n\n"
-            f"Te esperamos!"
+            f"Tu solicitud de cita ha sido enviada!\n\n"
+            f"Tipo: {nueva_cita.tipo_cita.capitalize()}\n"
+            f"Fecha solicitada: {nueva_cita.fecha_cita}\n"
+            f"Motivo: {nueva_cita.motivo}\n\n"
+            f"Un asesor revisara tu solicitud y te confirmara pronto.\n"
+            f"Horario de atencion: Lunes a viernes de {HORARIO_INICIO}am a {HORARIO_FIN}pm."
         )
     except Exception as e:
         db.session.rollback()
@@ -147,7 +195,9 @@ def confirmar_cita(numero, fecha):
 
 
 def buscar_y_cancelar_cita(numero, documento):
-    cita = Cita.query.filter_by(documento=documento, estado='activa').first()
+    cita = Cita.query.filter_by(documento=documento, estado='pendiente').first()
+    if not cita:
+        cita = Cita.query.filter_by(documento=documento, estado='confirmada').first()
     if cita:
         sesiones[numero] = {'flujo': 'cancelar', 'paso': 'confirmar', 'cita_id': cita.id}
         data = {
@@ -157,7 +207,7 @@ def buscar_y_cancelar_cita(numero, documento):
             "type": "interactive",
             "interactive": {
                 "type": "button",
-                "body": {"text": f"Encontre tu cita:\n\nNombre: {cita.nombre}\nFecha: {cita.fecha_cita}\n\nDeseas cancelarla?"},
+                "body": {"text": f"Encontre tu cita:\n\nNombre: {cita.nombre}\nTipo: {cita.tipo_cita}\nFecha: {cita.fecha_cita}\n\nDeseas cancelarla?"},
                 "action": {
                     "buttons": [
                         {"type": "reply", "reply": {"id": "si_cancelar", "title": "Si, cancelar"}},
@@ -176,7 +226,6 @@ def buscar_y_cancelar_cita(numero, documento):
 
 
 def ejecutar_cancelacion(numero):
-    from models import db
     sesion = sesiones.get(numero, {})
     cita = Cita.query.get(sesion.get('cita_id'))
     try:
@@ -184,7 +233,7 @@ def ejecutar_cancelacion(numero):
             cita.estado = 'cancelada'
             db.session.commit()
             agregar_mensajes_log(f"Cita cancelada: {cita.nombre} | {cita.fecha_cita}")
-            enviar_texto(numero, f"Tu cita del {cita.fecha_cita} ha sido cancelada correctamente.")
+            enviar_texto(numero, f"Tu cita del {cita.fecha_cita} ha sido cancelada.")
         else:
             enviar_texto(numero, "No se pudo cancelar la cita.")
     except Exception as e:
