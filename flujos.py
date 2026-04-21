@@ -4,13 +4,20 @@ from mensajes import (enviar_texto, enviar_menu, enviar_bienvenida,
                       mostrar_fechas_disponibles, enviar_tipo_cita,
                       enviar_requisitos, enviar_fuera_horario)
 from config import LINK_ASESOR, HORARIO_INICIO, HORARIO_FIN
+import pytz
 
 sesiones = {}
 
 def dentro_de_horario():
-    ahora = datetime.now()
-    if ahora.weekday() >= 5:  # sabado o domingo
+    bogota = pytz.timezone("America/Bogota")
+    ahora = datetime.now(bogota)
+
+    print("HORA COLOMBIA:", ahora.hour, ahora.minute)
+    print("DIA:", ahora.weekday())
+
+    if ahora.weekday() >= 5:
         return False
+
     return HORARIO_INICIO <= ahora.hour < HORARIO_FIN
 
 def manejar_boton(numero, opcion_id):
