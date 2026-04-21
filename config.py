@@ -4,3 +4,20 @@ TOKEN_META = "EAAY5YGNZBIz8BRXwA8UTEa16UrRYq3UZAoinyvHxjyXzLsaGAfimXp6qWUD4ZBlMO
 PHONE_NUMBER_ID = "1112533955267866"
 LINK_ASESOR = "https://wa.me/573118930862"
 URL_BASE = "https://python-2-zqc5.onrender.com"
+SECRET_KEY = "cib_secret_2025"
+
+HORARIO_INICIO = 9    # 9am
+HORARIO_FIN = 12      # 12pm
+
+REQUISITOS = {
+    'presencial': [
+        "Documento de identidad vigente",
+        "Orden medica (si aplica)",
+        "Llegar 15 minutos antes de la cita"
+    ],
+    'domicilio': [
+        "Documento de identidad vigente",
+        "Direccion completa y detallada",
+        "Disponibilidad entre 8am y 5pm"
+    ]
+}

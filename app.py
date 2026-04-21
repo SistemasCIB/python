@@ -1,18 +1,28 @@
 from flask import Flask, render_template, send_from_directory
-from models import db, Log, ordenar_por_fecha_y_hora
+from models import db, Log, Cita, Consentimiento, Asesor
 from webhook import webhook_bp
+from asesor import asesor_bp
+from config import SECRET_KEY
 from datetime import datetime
-
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///metapython.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['SECRET_KEY'] = SECRET_KEY
 
 db.init_app(app)
 app.register_blueprint(webhook_bp)
+app.register_blueprint(asesor_bp)
 
 with app.app_context():
     db.create_all()
+    # Crear asesor por defecto si no existe
+    if not Asesor.query.filter_by(usuario='admin').first():
+        asesor = Asesor(usuario='admin', nombre='Administrador')
+        asesor.set_password('cib2025')
+        db.session.add(asesor)
+        db.session.commit()
+        print("Asesor creado: admin / cib2025")
 
 @app.teardown_appcontext
 def shutdown_session(exception=None):
@@ -23,7 +33,6 @@ def ordenar_registros_por_fecha(registros):
 
 @app.route('/')
 def index():
-    from models import Cita, Consentimiento
     registros = ordenar_registros_por_fecha(Log.query.all())
     citas = Cita.query.order_by(Cita.creada_en.desc()).all()
     consentimientos = Consentimiento.query.order_by(Consentimiento.fecha.desc()).all()

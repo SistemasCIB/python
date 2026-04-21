@@ -1,6 +1,6 @@
 import http.client
 import json
-from config import TOKEN_META, PHONE_NUMBER_ID
+from config import TOKEN_META, PHONE_NUMBER_ID, LINK_ASESOR, HORARIO_INICIO, HORARIO_FIN, REQUISITOS
 from models import agregar_mensajes_log
 
 def enviar_request(data):
@@ -15,7 +15,7 @@ def enviar_request(data):
         if response.status != 200:
             agregar_mensajes_log(f"Error envio | {response.status} {response.reason}")
     except Exception as e:
-           agregar_mensajes_log(f"Error envio: {str(e)}")
+        agregar_mensajes_log(f"Error envio: {str(e)}")
     finally:
         connection.close()
 
@@ -53,7 +53,6 @@ def enviar_menu(numero):
         }
     }
     enviar_request(data)
-   
 
 def enviar_bienvenida(numero):
     from config import URL_BASE
@@ -74,8 +73,49 @@ def enviar_bienvenida(numero):
             "body": {"text": "Autorizas el tratamiento de tus datos personales segun la Ley 1581 de 2012?"},
             "action": {
                 "buttons": [
-                    {"type": "reply", "reply": {"id": "acepto_datos",   "title": "Si, acepto"}},
-                    {"type": "reply", "reply": {"id": "no_acepto_datos","title": "No acepto"}}
+                    {"type": "reply", "reply": {"id": "acepto_datos",    "title": "Si, acepto"}},
+                    {"type": "reply", "reply": {"id": "no_acepto_datos", "title": "No acepto"}}
+                ]
+            }
+        }
+    }
+    enviar_request(data)
+
+def enviar_tipo_cita(numero):
+    data = {
+        "messaging_product": "whatsapp",
+        "recipient_type": "individual",
+        "to": numero,
+        "type": "interactive",
+        "interactive": {
+            "type": "button",
+            "body": {"text": "Que tipo de cita necesitas?"},
+            "action": {
+                "buttons": [
+                    {"type": "reply", "reply": {"id": "tipo_presencial", "title": "Presencial"}},
+                    {"type": "reply", "reply": {"id": "tipo_domicilio",  "title": "Domicilio"}}
+                ]
+            }
+        }
+    }
+    enviar_request(data)
+
+def enviar_requisitos(numero, tipo):
+    requisitos = REQUISITOS.get(tipo, [])
+    lista = "\n".join([f"- {r}" for r in requisitos])
+    horario = f"Horario de atencion: Lunes a viernes de {HORARIO_INICIO}am a {HORARIO_FIN}pm"
+    data = {
+        "messaging_product": "whatsapp",
+        "recipient_type": "individual",
+        "to": numero,
+        "type": "interactive",
+        "interactive": {
+            "type": "button",
+            "body": {"text": f"Para una cita {tipo} necesitas:\n\n{lista}\n\n{horario}\n\nCumples con estos requisitos?"},
+            "action": {
+                "buttons": [
+                    {"type": "reply", "reply": {"id": "cumple_si", "title": "Si, cumplo"}},
+                    {"type": "reply", "reply": {"id": "cumple_no", "title": "No cumplo"}}
                 ]
             }
         }
@@ -84,13 +124,14 @@ def enviar_bienvenida(numero):
 
 def mostrar_fechas_disponibles(numero, sesiones):
     from datetime import datetime, timedelta
+    DIAS_ES = ["Lunes","Martes","Miercoles","Jueves","Viernes","Sabado","Domingo"]
+    MESES_ES = ["","Enero","Febrero","Marzo","Abril","Mayo","Junio",
+                "Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"]
+
     dias = []
     dia = datetime.now() + timedelta(days=1)
     while len(dias) < 3:
         if dia.weekday() < 5:
-            DIAS_ES = ["Lunes","Martes","Miercoles","Jueves","Viernes","Sabado","Domingo"]
-            MESES_ES = ["","Enero","Febrero","Marzo","Abril","Mayo","Junio",
-                       "Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"]
             dias.append(f"{DIAS_ES[dia.weekday()]} {dia.day} de {MESES_ES[dia.month]}")
         dia += timedelta(days=1)
 
@@ -114,3 +155,11 @@ def mostrar_fechas_disponibles(numero, sesiones):
         }
     }
     enviar_request(data)
+
+def enviar_fuera_horario(numero):
+    from config import HORARIO_INICIO, HORARIO_FIN
+    enviar_texto(numero,
+        f"Nuestros asesores estan disponibles de lunes a viernes "
+        f"de {HORARIO_INICIO}am a {HORARIO_FIN}pm.\n\n"
+        f"Por favor contactanos en ese horario. Gracias!"
+    )

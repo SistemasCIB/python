@@ -1,0 +1,95 @@
+from flask import Blueprint, render_template, request, redirect, url_for, session, jsonify
+from models import db, Cita, Asesor
+from mensajes import enviar_texto
+from config import HORARIO_INICIO, HORARIO_FIN
+import io, csv
+from flask import Response
+
+asesor_bp = Blueprint('asesor', __name__)
+
+def login_requerido(f):
+    from functools import wraps
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        if not session.get('asesor_id'):
+            return redirect(url_for('asesor.login'))
+        return f(*args, **kwargs)
+    return decorated
+
+@asesor_bp.route('/asesor/login', methods=['GET', 'POST'])
+def login():
+    error = None
+    if request.method == 'POST':
+        usuario = request.form.get('usuario')
+        password = request.form.get('password')
+        asesor = Asesor.query.filter_by(usuario=usuario).first()
+        if asesor and asesor.check_password(password):
+            session['asesor_id'] = asesor.id
+            session['asesor_nombre'] = asesor.nombre
+            return redirect(url_for('asesor.panel'))
+        error = "Usuario o contrasena incorrectos"
+    return render_template('login.html', error=error)
+
+@asesor_bp.route('/asesor/logout')
+def logout():
+    session.clear()
+    return redirect(url_for('asesor.login'))
+
+@asesor_bp.route('/asesor')
+@login_requerido
+def panel():
+    citas = Cita.query.order_by(Cita.creada_en.desc()).all()
+    return render_template('asesor.html',
+        citas=citas,
+        asesor_nombre=session.get('asesor_nombre'),
+        horario_inicio=HORARIO_INICIO,
+        horario_fin=HORARIO_FIN
+    )
+
+@asesor_bp.route('/asesor/confirmar/<int:cita_id>')
+@login_requerido
+def confirmar_cita(cita_id):
+    cita = Cita.query.get(cita_id)
+    if cita:
+        cita.estado = 'confirmada'
+        db.session.commit()
+        enviar_texto(cita.numero_whatsapp,
+            f"Tu cita ha sido CONFIRMADA!\n\n"
+            f"Tipo: {cita.tipo_cita.capitalize()}\n"
+            f"Fecha: {cita.fecha_cita}\n"
+            f"Motivo: {cita.motivo}\n\n"
+            f"Te esperamos. Horario: {HORARIO_INICIO}am a {HORARIO_FIN}pm."
+        )
+    return redirect(url_for('asesor.panel'))
+
+@asesor_bp.route('/asesor/rechazar/<int:cita_id>')
+@login_requerido
+def rechazar_cita(cita_id):
+    cita = Cita.query.get(cita_id)
+    if cita:
+        cita.estado = 'rechazada'
+        db.session.commit()
+        enviar_texto(cita.numero_whatsapp,
+            f"Lo sentimos, tu solicitud de cita no pudo ser confirmada.\n\n"
+            f"Para mas informacion contacta a nuestros asesores."
+        )
+    return redirect(url_for('asesor.panel'))
+
+@asesor_bp.route('/asesor/exportar')
+@login_requerido
+def exportar_excel():
+    citas = Cita.query.order_by(Cita.creada_en.desc()).all()
+    output = io.StringIO()
+    writer = csv.writer(output)
+    writer.writerow(['ID','Nombre','Documento','Telefono','Tipo','Motivo','Fecha','WhatsApp','Estado','Registrada'])
+    for c in citas:
+        writer.writerow([c.id, c.nombre, c.documento, c.telefono,
+                        c.tipo_cita, c.motivo, c.fecha_cita,
+                        c.numero_whatsapp, c.estado,
+                        c.creada_en.strftime('%d/%m/%Y %H:%M')])
+    output.seek(0)
+    return Response(
+        output.getvalue(),
+        mimetype='text/csv',
+        headers={"Content-Disposition": "attachment;filename=citas_cib.csv"}
+    )
