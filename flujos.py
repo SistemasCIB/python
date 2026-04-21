@@ -4,13 +4,14 @@ from mensajes import (enviar_texto, enviar_menu, enviar_bienvenida,
                       mostrar_fechas_disponibles, enviar_tipo_cita,
                       enviar_requisitos, enviar_fuera_horario)
 from config import LINK_ASESOR, HORARIO_INICIO, HORARIO_FIN
-import pytz
+from datetime import timezone, timedelta
 
 sesiones = {}
 
 def dentro_de_horario():
-    bogota = pytz.timezone("America/Bogota")
+    bogota = timezone(timedelta(hours=-5))
     ahora = datetime.now(bogota)
+
 
     print("HORA COLOMBIA:", ahora.hour, ahora.minute)
     print("DIA:", ahora.weekday())
