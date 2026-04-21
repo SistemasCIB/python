@@ -10,12 +10,19 @@ sesiones = {}
 
 def dentro_de_horario():
     from datetime import datetime, timedelta
-    # Colombia es UTC-5
+
+    # Colombia UTC-5
     ahora = datetime.utcnow() - timedelta(hours=5)
-    agregar_mensajes_log(f"Hora Colombia: {ahora.hour}:{ahora.minute} | Dia: {ahora.weekday()}")
+
+    agregar_mensajes_log(
+        f"Hora: {ahora.hour} | Min: {ahora.minute} | Dia: {ahora.weekday()}"
+    )
+
+    # 0 = lunes, 6 = domingo
     if ahora.weekday() >= 5:
         return False
-    return HORARIO_INICIO <= ahora.hour < HORARIO_FIN
+
+    return 7 <= ahora.hour < 17
 
 def manejar_boton(numero, opcion_id):
 
