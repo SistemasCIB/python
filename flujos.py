@@ -4,21 +4,13 @@ from mensajes import (enviar_texto, enviar_menu, enviar_bienvenida,
                       mostrar_fechas_disponibles, enviar_tipo_cita,
                       enviar_requisitos, enviar_fuera_horario)
 from config import LINK_ASESOR, HORARIO_INICIO, HORARIO_FIN
-from datetime import timezone, timedelta
 
 sesiones = {}
 
 def dentro_de_horario():
-    bogota = timezone(timedelta(hours=-5))
-    ahora = datetime.now(bogota)
-
-
-    print("HORA COLOMBIA:", ahora.hour, ahora.minute)
-    print("DIA:", ahora.weekday())
-
-    if ahora.weekday() >= 5:
+    ahora = datetime.now()
+    if ahora.weekday() >= 5:  # sabado o domingo
         return False
-
     return HORARIO_INICIO <= ahora.hour < HORARIO_FIN
 
 def manejar_boton(numero, opcion_id):
@@ -52,15 +44,11 @@ def manejar_boton(numero, opcion_id):
 
     # ── MENÚ PRINCIPAL ──
     elif opcion_id == 'agendar':
-        if not dentro_de_horario():
-            enviar_fuera_horario(numero)
-            return
-        enviar_texto(numero,
-            "Para agendar una cita comunicate directamente con uno de nuestros asesores:\n\n"
-            f"{LINK_ASESOR}\n\n"
-            f"Disponibles lunes a viernes de {HORARIO_INICIO}am a {HORARIO_FIN}pm."
-        )
-        enviar_menu(numero)
+       if not dentro_de_horario():
+          enviar_fuera_horario(numero)
+          return
+       sesiones[numero] = {'flujo': 'agendar', 'paso': 'tipo_cita'}
+       enviar_tipo_cita(numero)
 
     elif opcion_id == 'cancelar':
         sesiones[numero] = {'flujo': 'cancelar', 'paso': 'documento'}
