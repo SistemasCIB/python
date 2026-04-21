@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 from models import db, Cita, Consentimiento, agregar_mensajes_log
 from mensajes import (enviar_texto, enviar_menu, enviar_bienvenida,
                       mostrar_fechas_disponibles, enviar_tipo_cita,
@@ -8,9 +8,12 @@ from config import LINK_ASESOR, HORARIO_INICIO, HORARIO_FIN
 sesiones = {}
 
 def dentro_de_horario():
-    ahora = datetime.now()
-    if ahora.weekday() >= 5:  # sabado o domingo
+    bogota = timezone(timedelta(hours=-5))
+    ahora = datetime.now(bogota)
+
+    if ahora.weekday() >= 5:
         return False
+
     return HORARIO_INICIO <= ahora.hour < HORARIO_FIN
 
 def manejar_boton(numero, opcion_id):
