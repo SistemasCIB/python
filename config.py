@@ -7,7 +7,7 @@ URL_BASE = "https://python-2-zqc5.onrender.com"
 SECRET_KEY = "cib_secret_2025"
 
 HORARIO_INICIO = 7    # 7am
-HORARIO_FIN = 5      # 5pm
+HORARIO_FIN = 17      # 5pm
 
 REQUISITOS = {
     'presencial': [
