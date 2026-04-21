@@ -1,19 +1,19 @@
-from datetime import datetime
 from models import db, Cita, Consentimiento, agregar_mensajes_log
 from mensajes import (enviar_texto, enviar_menu, enviar_bienvenida,
                       mostrar_fechas_disponibles, enviar_tipo_cita,
                       enviar_requisitos, enviar_fuera_horario)
 from config import LINK_ASESOR, HORARIO_INICIO, HORARIO_FIN
-import pytz
+
 
 sesiones = {}
 
+
 def dentro_de_horario():
-    import pytz
-    from datetime import datetime
-    zona_colombia = pytz.timezone('America/Bogota')
-    ahora = datetime.now(zona_colombia)
-    if ahora.weekday() >= 5:  # sabado o domingo
+    from datetime import datetime, timedelta
+    # Colombia es UTC-5
+    ahora = datetime.utcnow() - timedelta(hours=5)
+    agregar_mensajes_log(f"Hora Colombia: {ahora.hour}:{ahora.minute} | Dia: {ahora.weekday()}")
+    if ahora.weekday() >= 5:
         return False
     return HORARIO_INICIO <= ahora.hour < HORARIO_FIN
 
