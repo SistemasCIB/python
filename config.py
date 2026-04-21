@@ -6,8 +6,8 @@ LINK_ASESOR = "https://wa.me/573118930862"
 URL_BASE = "https://python-2-zqc5.onrender.com"
 SECRET_KEY = "cib_secret_2025"
 
-HORARIO_INICIO = 9    # 9am
-HORARIO_FIN = 12      # 12pm
+HORARIO_INICIO = 7    # 7am
+HORARIO_FIN = 5      # 5pm
 
 REQUISITOS = {
     'presencial': [
