@@ -79,8 +79,8 @@ def manejar_boton(numero, opcion_id):
             enviar_fuera_horario(numero)
             return
         enviar_texto(numero,
-            f"Estimados clientes,\n\n"
-            f"Les informamos que a partir de la fecha, todas las comunicaciones o solicitudes relacionadas con:,n\n"
+            f"Estimados clientes\n\n"
+            f"Les informamos que a partir de la fecha, todas las comunicaciones o solicitudes relacionadas con:\n"
             f"• Estado de resultados\n"
             f"• Dudas de remisiones\n"
             f"• Inquietudes sobre tipos y/o requisitos de muestras\n"
