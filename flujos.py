@@ -1,7 +1,7 @@
 from models import db, Cita, Consentimiento, agregar_mensajes_log
 from mensajes import (enviar_texto, enviar_menu, enviar_bienvenida,
                       mostrar_fechas_disponibles, enviar_tipo_cita,
-                      enviar_requisitos, enviar_fuera_horario)
+                      enviar_requisitos, enviar_fuera_horario, enviar_politica_datos)
 from config import LINK_ASESOR, HORARIO_INICIO, HORARIO_FIN
 
 
@@ -25,6 +25,15 @@ def dentro_de_horario():
     return 7 <= ahora.hour < 17
 
 def manejar_boton(numero, opcion_id):
+    # ── Paciente o Cliente ──
+    if opcion_id == 'paciente':
+        enviar_politica_datos(numero)
+        return
+    elif opcion_id == 'cliente':
+        enviar_texto(
+            numero,
+            f"Para atención comercial comunícate al siguiente LINK:\n\n{LINK_ASESOR}"
+            )
 
     # ── POLÍTICA DE DATOS ──
     if opcion_id == 'acepto_datos':
@@ -70,9 +79,19 @@ def manejar_boton(numero, opcion_id):
             enviar_fuera_horario(numero)
             return
         enviar_texto(numero,
-            f"Te comunico con uno de nuestros asesores:\n\n"
+            f"Estimados clientes,\n\n"
+            f"Les informamos que a partir de la fecha, todas las comunicaciones o solicitudes relacionadas con:,n\n"
+            f"• Estado de resultados\n"
+            f"• Dudas de remisiones\n"
+            f"• Inquietudes sobre tipos y/o requisitos de muestras\n"
+            f"• Información sobre días y horarios de procedimientos de laboratorio\n"
+            f"• Entre otros temas similares\n\n"
+            f"Deberán realizarse exclusivamente a través de nuestra línea de WhatsApp: \n"
             f"{LINK_ASESOR}\n\n"
-            f"Disponibles lunes a viernes de {HORARIO_INICIO}am a {HORARIO_FIN}pm."
+            f"Agradecemos su comprensión y colaboración para centralizar la atención y brindarles un mejor servicio.\n\n"
+            f"Les informamos que el horario oficial para la asignación de citas es de lunes a viernes {HORARIO_INICIO}am a {HORARIO_FIN}pm.\n"
+            f"Las solicitudes realizadas fuera de este horario no podrán ser gestionadas. Por ello, agradecemos que las peticiones se envíen dentro del horario establecido para garantizar una atención oportuna y eficiente."
+
         )
         enviar_menu(numero)
 

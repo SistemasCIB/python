@@ -55,14 +55,6 @@ def enviar_menu(numero):
     enviar_request(data)
 
 def enviar_bienvenida(numero):
-    from config import URL_BASE
-    enviar_texto(numero,
-        "Bienvenido a la Corporacion para Investigaciones Biologicas - CIB\n\n"
-        "Antes de continuar, por favor lee nuestra Politica de Tratamiento "
-        "y Proteccion de Datos Personales:\n\n"
-        f"{URL_BASE}/politica\n\n"
-        "Para continuar necesitamos tu autorizacion:"
-    )
     data = {
         "messaging_product": "whatsapp",
         "recipient_type": "individual",
@@ -70,15 +62,77 @@ def enviar_bienvenida(numero):
         "type": "interactive",
         "interactive": {
             "type": "button",
-            "body": {"text": "Autorizas el tratamiento de tus datos personales segun la Ley 1581 de 2012?"},
+            "body": {
+                "text": (
+                    "Bienvenido a la Corporacion para Investigaciones "
+                    "Biologicas - CIB 👋\n\n"
+                    "Antes de continuar, selecciona el tipo de usuario:"
+                )
+            },
             "action": {
                 "buttons": [
-                    {"type": "reply", "reply": {"id": "acepto_datos",    "title": "Si, acepto"}},
-                    {"type": "reply", "reply": {"id": "no_acepto_datos", "title": "No acepto"}}
+                    {
+                        "type": "reply",
+                        "reply": {
+                            "id": "soy_paciente",
+                            "title": "Paciente"
+                        }
+                    },
+                    {
+                        "type": "reply",
+                        "reply": {
+                            "id": "soy_cliente",
+                            "title": "Cliente"
+                        }
+                    }
                 ]
             }
         }
     }
+
+    enviar_request(data)
+    
+def enviar_politica_datos(numero):
+    from config import URL_BASE
+
+    enviar_texto(
+        numero,
+        "Antes de continuar, por favor lee nuestra Politica de "
+        "Tratamiento y Proteccion de Datos Personales:\n\n"
+        f"{URL_BASE}/politica"
+    )
+
+    data = {
+        "messaging_product": "whatsapp",
+        "recipient_type": "individual",
+        "to": numero,
+        "type": "interactive",
+        "interactive": {
+            "type": "button",
+            "body": {
+                "text": "Autorizas el tratamiento de tus datos personales?"
+            },
+            "action": {
+                "buttons": [
+                    {
+                        "type": "reply",
+                        "reply": {
+                            "id": "acepto_datos",
+                            "title": "Si acepto"
+                        }
+                    },
+                    {
+                        "type": "reply",
+                        "reply": {
+                            "id": "no_acepto_datos",
+                            "title": "No acepto"
+                        }
+                    }
+                ]
+            }
+        }
+    }
+
     enviar_request(data)
 
 def enviar_tipo_cita(numero):
