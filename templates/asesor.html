@@ -1,291 +1,407 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CIB - Panel Asesor</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Inter', sans-serif; background: #f0f2f5; color: #1a1a2e; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-        header {
-            background: #1a1a2e;
-            color: white;
-            padding: 16px 40px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        header h1 { font-size: 16px; font-weight: 600; }
-        header span { font-size: 13px; color: #8892b0; }
-        .header-right { display: flex; align-items: center; gap: 16px; }
-        .btn-logout {
-            background: transparent;
-            border: 1px solid #8892b0;
-            color: #8892b0;
-            padding: 6px 14px;
-            border-radius: 6px;
-            font-size: 12px;
-            cursor: pointer;
-            text-decoration: none;
-            transition: all 0.2s;
-        }
-        .btn-logout:hover { border-color: white; color: white; }
+<title>CIB - Panel Asesor</title>
 
-        .content { padding: 30px 40px; }
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 
-        .stats {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 16px;
-            margin-bottom: 24px;
-        }
-        .stat-card {
-            background: white;
-            border-radius: 8px;
-            padding: 20px;
-            border: 1px solid #e0e0e0;
-        }
-        .stat-card .label { font-size: 12px; color: #888; text-transform: uppercase; letter-spacing: 0.5px; }
-        .stat-card .value { font-size: 28px; font-weight: 600; margin-top: 6px; }
-        .stat-card.pendiente .value { color: #e67e22; }
-        .stat-card.confirmada .value { color: #1a7a4a; }
-        .stat-card.rechazada .value { color: #c0392b; }
-        .stat-card.total .value { color: #1a1a2e; }
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
 
-        .table-wrapper {
-            background: white;
-            border-radius: 8px;
-            border: 1px solid #e0e0e0;
-            overflow: hidden;
-        }
-        .table-header {
-            padding: 16px 20px;
-            border-bottom: 1px solid #e0e0e0;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .table-header h2 { font-size: 15px; font-weight: 600; }
+body{
+    font-family:'Inter',sans-serif;
+    background:#f4f6f8;
+    color:#1a1a2e;
+}
 
-        .btn-exportar {
-            background: #1a1a2e;
-            color: white;
-            padding: 8px 16px;
-            border-radius: 6px;
-            font-size: 13px;
-            text-decoration: none;
-            font-weight: 500;
-            transition: background 0.2s;
-        }
-        .btn-exportar:hover { background: #2d2d4e; }
+/* HEADER */
 
-        .filtros {
-            padding: 12px 20px;
-            border-bottom: 1px solid #e0e0e0;
-            display: flex;
-            gap: 8px;
-        }
-        .filtro {
-            padding: 5px 14px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 500;
-            cursor: pointer;
-            border: 1px solid #ddd;
-            background: white;
-            color: #666;
-            transition: all 0.2s;
-        }
-        .filtro.active, .filtro:hover { background: #1a1a2e; color: white; border-color: #1a1a2e; }
+header{
+    background:#1a1a2e;
+    color:white;
+    padding:18px 40px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
 
-        table { width: 100%; border-collapse: collapse; }
-        th {
-            background: #fafafa;
-            padding: 11px 16px;
-            text-align: left;
-            font-size: 12px;
-            font-weight: 600;
-            color: #888;
-            text-transform: uppercase;
-            letter-spacing: 0.4px;
-            border-bottom: 1px solid #e0e0e0;
-        }
-        td {
-            padding: 12px 16px;
-            font-size: 13px;
-            border-bottom: 1px solid #f0f0f0;
-            color: #333;
-        }
-        tr:last-child td { border-bottom: none; }
-        tr:hover td { background: #fafafa; }
+header h1{
+    font-size:18px;
+    font-weight:600;
+}
 
-        .pill {
-            display: inline-block;
-            padding: 3px 10px;
-            border-radius: 20px;
-            font-size: 11px;
-            font-weight: 500;
-        }
-        .pill.pendiente  { background: #fef3e2; color: #e67e22; }
-        .pill.confirmada { background: #e6f7ef; color: #1a7a4a; }
-        .pill.rechazada  { background: #fdecea; color: #c0392b; }
-        .pill.cancelada  { background: #f0f0f0; color: #888; }
-        .pill.presencial { background: #e8f0fe; color: #1a73e8; }
-        .pill.domicilio  { background: #f3e8fd; color: #7b1fa2; }
+header span{
+    font-size:13px;
+    color:#aab0c5;
+}
 
-        .acciones { display: flex; gap: 6px; }
-        .btn-confirmar {
-            background: #e6f7ef;
-            color: #1a7a4a;
-            border: none;
-            padding: 5px 12px;
-            border-radius: 6px;
-            font-size: 12px;
-            font-weight: 500;
-            cursor: pointer;
-            text-decoration: none;
-            transition: background 0.2s;
-        }
-        .btn-confirmar:hover { background: #1a7a4a; color: white; }
-        .btn-rechazar {
-            background: #fdecea;
-            color: #c0392b;
-            border: none;
-            padding: 5px 12px;
-            border-radius: 6px;
-            font-size: 12px;
-            font-weight: 500;
-            cursor: pointer;
-            text-decoration: none;
-            transition: background 0.2s;
-        }
-        .btn-rechazar:hover { background: #c0392b; color: white; }
+.header-right{
+    display:flex;
+    align-items:center;
+    gap:14px;
+}
 
-        .horario {
-            background: #e8f0fe;
-            color: #1a73e8;
-            padding: 8px 16px;
-            border-radius: 6px;
-            font-size: 12px;
-            font-weight: 500;
-        }
-        .empty { text-align: center; padding: 40px; color: #aaa; font-size: 14px; }
-    </style>
+.btn-header{
+    text-decoration:none;
+    padding:8px 14px;
+    border-radius:6px;
+    font-size:13px;
+    font-weight:500;
+}
+
+.btn-nueva{
+    background:#27ae60;
+    color:white;
+}
+
+.btn-exportar{
+    background:#2980b9;
+    color:white;
+}
+
+.btn-logout{
+    border:1px solid #777;
+    color:#ddd;
+}
+
+/* CONTENT */
+
+.content{
+    padding:30px 40px;
+}
+
+/* STATS */
+
+.stats{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:15px;
+    margin-bottom:25px;
+}
+
+.card{
+    background:white;
+    border-radius:10px;
+    padding:20px;
+    border:1px solid #e5e5e5;
+}
+
+.card .label{
+    font-size:12px;
+    color:#777;
+    text-transform:uppercase;
+}
+
+.card .value{
+    margin-top:6px;
+    font-size:28px;
+    font-weight:700;
+}
+
+.orange{ color:#e67e22; }
+.green{ color:#27ae60; }
+.red{ color:#c0392b; }
+.blue{ color:#2980b9; }
+
+/* TABLE */
+
+.table-box{
+    background:white;
+    border-radius:10px;
+    overflow:hidden;
+    border:1px solid #e5e5e5;
+}
+
+.table-header{
+    padding:18px 20px;
+    border-bottom:1px solid #eee;
+    font-weight:600;
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+}
+
+th{
+    background:#fafafa;
+    padding:12px;
+    font-size:12px;
+    text-transform:uppercase;
+    color:#777;
+    text-align:left;
+}
+
+td{
+    padding:12px;
+    font-size:13px;
+    border-bottom:1px solid #f0f0f0;
+}
+
+tr:hover td{
+    background:#fafafa;
+}
+
+/* PILLS */
+
+.pill{
+    padding:4px 10px;
+    border-radius:20px;
+    font-size:11px;
+    font-weight:600;
+    display:inline-block;
+}
+
+.pendiente{
+    background:#fff3e0;
+    color:#e67e22;
+}
+
+.confirmada{
+    background:#e8f8ef;
+    color:#27ae60;
+}
+
+.rechazada{
+    background:#fdecea;
+    color:#c0392b;
+}
+
+.cancelada{
+    background:#f0f0f0;
+    color:#888;
+}
+
+.presencial{
+    background:#e8f0fe;
+    color:#1a73e8;
+}
+
+.domicilio{
+    background:#f4e8fd;
+    color:#7b1fa2;
+}
+
+/* ACTIONS */
+
+.actions{
+    display:flex;
+    gap:6px;
+    flex-wrap:wrap;
+}
+
+.btn{
+    padding:6px 10px;
+    border-radius:6px;
+    text-decoration:none;
+    font-size:12px;
+    font-weight:600;
+}
+
+.btn-confirm{
+    background:#e8f8ef;
+    color:#27ae60;
+}
+
+.btn-edit{
+    background:#e8f0fe;
+    color:#1a73e8;
+}
+
+.btn-reject{
+    background:#fdecea;
+    color:#c0392b;
+}
+
+.empty{
+    text-align:center;
+    padding:40px;
+    color:#888;
+}
+</style>
 </head>
+
 <body>
 
 <header>
+
     <div>
-        <h1>CIB — Panel de Asesores</h1>
-        <span>Gestion de citas</span>
+        <h1>CIB - Panel de Asesores</h1>
+        <span>Gestión de citas</span>
     </div>
+
     <div class="header-right">
-        <span class="horario">Horario: Lunes-Viernes {{ horario_inicio }}am - {{ horario_fin }}pm</span>
-        <span style="color:#8892b0; font-size:13px;">{{ asesor_nombre }}</span>
-        <a href="/asesor/logout" class="btn-logout">Cerrar sesion</a>
+
+        <span>{{ asesor_nombre }}</span>
+
+        <a href="/asesor/nueva" class="btn-header btn-nueva">
+            Nueva cita
+        </a>
+
+        <a href="/asesor/exportar" class="btn-header btn-exportar">
+            Exportar CSV
+        </a>
+
+        <a href="/asesor/logout" class="btn-header btn-logout">
+            Salir
+        </a>
+
     </div>
+
 </header>
+
 
 <div class="content">
 
+    <!-- STATS -->
+
     <div class="stats">
-        <div class="stat-card total">
-            <div class="label">Total citas</div>
-            <div class="value">{{ citas|length }}</div>
+
+        <div class="card">
+            <div class="label">Total</div>
+            <div class="value blue">{{ citas|length }}</div>
         </div>
-        <div class="stat-card pendiente">
+
+        <div class="card">
             <div class="label">Pendientes</div>
-            <div class="value">{{ citas|selectattr('estado','equalto','pendiente')|list|length }}</div>
+            <div class="value orange">
+                {{ citas|selectattr('estado','equalto','pendiente')|list|length }}
+            </div>
         </div>
-        <div class="stat-card confirmada">
+
+        <div class="card">
             <div class="label">Confirmadas</div>
-            <div class="value">{{ citas|selectattr('estado','equalto','confirmada')|list|length }}</div>
+            <div class="value green">
+                {{ citas|selectattr('estado','equalto','confirmada')|list|length }}
+            </div>
         </div>
-        <div class="stat-card rechazada">
+
+        <div class="card">
             <div class="label">Rechazadas</div>
-            <div class="value">{{ citas|selectattr('estado','equalto','rechazada')|list|length }}</div>
+            <div class="value red">
+                {{ citas|selectattr('estado','equalto','rechazada')|list|length }}
+            </div>
         </div>
+
     </div>
 
-    <div class="table-wrapper">
-        <div class="table-header">
-            <h2>Solicitudes de Citas</h2>
-            <a href="/asesor/exportar" class="btn-exportar">Exportar CSV</a>
-        </div>
 
-        <div class="filtros">
-            <button class="filtro active" onclick="filtrar('todas', this)">Todas</button>
-            <button class="filtro" onclick="filtrar('pendiente', this)">Pendientes</button>
-            <button class="filtro" onclick="filtrar('confirmada', this)">Confirmadas</button>
-            <button class="filtro" onclick="filtrar('rechazada', this)">Rechazadas</button>
-            <button class="filtro" onclick="filtrar('cancelada', this)">Canceladas</button>
+    <!-- TABLE -->
+
+    <div class="table-box">
+
+        <div class="table-header">
+            Solicitudes Registradas
         </div>
 
         {% if citas %}
+
         <table>
+
             <thead>
                 <tr>
-                    <th>#</th>
+                    <th>ID</th>
                     <th>Nombre</th>
                     <th>Documento</th>
                     <th>Telefono</th>
                     <th>Tipo</th>
                     <th>Motivo</th>
-                    <th>Fecha solicitada</th>
+                    <th>Fecha</th>
                     <th>Estado</th>
                     <th>Registrada</th>
                     <th>Acciones</th>
                 </tr>
             </thead>
-            <tbody id="tablaCitas">
-                {% for c in citas %}
-                <tr data-estado="{{ c.estado }}">
-                    <td style="color:#888;">{{ c.id }}</td>
-                    <td><strong>{{ c.nombre }}</strong></td>
-                    <td>{{ c.documento }}</td>
-                    <td>{{ c.telefono }}</td>
-                    <td><span class="pill {{ c.tipo_cita }}">{{ c.tipo_cita.capitalize() if c.tipo_cita else '-' }}</span></td>
-                    <td style="max-width:200px;">{{ c.motivo }}</td>
-                    <td>{{ c.fecha_cita }}</td>
-                    <td><span class="pill {{ c.estado }}">{{ c.estado.capitalize() }}</span></td>
-                    <td style="color:#888; white-space:nowrap;">{{ c.creada_en.strftime('%d/%m/%Y %H:%M') }}</td>
-                    <td>
-                        <div class="acciones">
-                            {% if c.estado == 'pendiente' %}
-                            <a href="/asesor/confirmar/{{ c.id }}" class="btn-confirmar"
-                               onclick="return confirm('Confirmar cita de {{ c.nombre }}?')">Confirmar</a>
-                            <a href="/asesor/rechazar/{{ c.id }}" class="btn-rechazar"
-                               onclick="return confirm('Rechazar cita de {{ c.nombre }}?')">Rechazar</a>
-                            {% else %}
-                            <span style="color:#bbb; font-size:12px;">Sin acciones</span>
-                            {% endif %}
-                        </div>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-        {% else %}
-        <div class="empty">No hay citas registradas aun.</div>
-        {% endif %}
-    </div>
-</div>
 
-<script>
-    function filtrar(estado, btn) {
-        document.querySelectorAll('.filtro').forEach(f => f.classList.remove('active'));
-        btn.classList.add('active');
-        document.querySelectorAll('#tablaCitas tr').forEach(row => {
-            if (estado === 'todas' || row.dataset.estado === estado) {
-                row.style.display = '';
-            } else {
-                row.style.display = 'none';
-            }
-        });
-    }
-</script>
+            <tbody>
+
+            {% for c in citas %}
+
+                <tr>
+
+                    <td>{{ c.id }}</td>
+
+                    <td>
+                        <strong>{{ c.nombre }}</strong>
+                    </td>
+
+                    <td>{{ c.documento }}</td>
+
+                    <td>{{ c.telefono }}</td>
+
+                    <td>
+                        <span class="pill {{ c.tipo_cita }}">
+                            {{ c.tipo_cita.capitalize() }}
+                        </span>
+                    </td>
+
+                    <td>{{ c.motivo }}</td>
+
+                    <td>{{ c.fecha_cita }}</td>
+
+                    <td>
+                        <span class="pill {{ c.estado }}">
+                            {{ c.estado.capitalize() }}
+                        </span>
+                    </td>
+
+                    <td>
+                        {{ c.creada_en.strftime('%d/%m/%Y %H:%M') }}
+                    </td>
+
+                    <td>
+
+                        <div class="actions">
+
+                            {% if c.estado == 'pendiente' %}
+
+                            <a href="/asesor/confirmar/{{ c.id }}"
+                               class="btn btn-confirm">
+                               Confirmar
+                            </a>
+
+                            <a href="/asesor/rechazar/{{ c.id }}"
+                               class="btn btn-reject">
+                               Rechazar
+                            </a>
+
+                            {% endif %}
+
+                            <a href="/asesor/editar/{{ c.id }}"
+                               class="btn btn-edit">
+                               Editar
+                            </a>
+
+                        </div>
+
+                    </td>
+
+                </tr>
+
+            {% endfor %}
+
+            </tbody>
+
+        </table>
+
+        {% else %}
+
+        <div class="empty">
+            No hay citas registradas aún.
+        </div>
+
+        {% endif %}
+
+    </div>
+
+</div>
 
 </body>
 </html>

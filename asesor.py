@@ -93,3 +93,48 @@ def exportar_excel():
         mimetype='text/csv',
         headers={"Content-Disposition": "attachment;filename=citas_cib.csv"}
     )
+@asesor_bp.route('/asesor/nueva', methods=['GET', 'POST'])
+@login_requerido
+def nueva_cita():
+
+    if request.method == 'POST':
+
+        cita = Cita(
+            nombre=request.form['nombre'],
+            documento=request.form['documento'],
+            telefono=request.form['telefono'],
+            tipo_cita=request.form['tipo_cita'],
+            motivo=request.form['motivo'],
+            fecha_cita=request.form['fecha_cita'],
+            numero_whatsapp=request.form['telefono'],
+            estado=request.form['estado']
+        )
+
+        db.session.add(cita)
+        db.session.commit()
+
+        return redirect(url_for('asesor.panel'))
+
+    return render_template('form_cita.html', cita=None)
+
+@asesor_bp.route('/asesor/editar/<int:cita_id>', methods=['GET', 'POST'])
+@login_requerido
+def editar_cita(cita_id):
+
+    cita = Cita.query.get_or_404(cita_id)
+
+    if request.method == 'POST':
+
+        cita.nombre = request.form['nombre']
+        cita.documento = request.form['documento']
+        cita.telefono = request.form['telefono']
+        cita.tipo_cita = request.form['tipo_cita']
+        cita.motivo = request.form['motivo']
+        cita.fecha_cita = request.form['fecha_cita']
+        cita.estado = request.form['estado']
+
+        db.session.commit()
+
+        return redirect(url_for('asesor.panel'))
+
+    return render_template('form_cita.html', cita=cita)

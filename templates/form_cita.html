@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Cita</title>
+</head>
+<body>
+
+<h2>{{ 'Editar cita' if cita else 'Nueva cita' }}</h2>
+
+<form method="POST">
+
+<input name="nombre" placeholder="Nombre" value="{{ cita.nombre if cita else '' }}"><br>
+<input name="documento" placeholder="Documento" value="{{ cita.documento if cita else '' }}"><br>
+<input name="telefono" placeholder="Telefono" value="{{ cita.telefono if cita else '' }}"><br>
+
+<select name="tipo_cita">
+<option value="presencial">Presencial</option>
+<option value="domicilio">Domicilio</option>
+</select>
+
+<input name="motivo" placeholder="Motivo" value="{{ cita.motivo if cita else '' }}"><br>
+<input name="fecha_cita" placeholder="Fecha" value="{{ cita.fecha_cita if cita else '' }}"><br>
+
+<select name="estado">
+<option value="pendiente">Pendiente</option>
+<option value="confirmada">Confirmada</option>
+<option value="rechazada">Rechazada</option>
+<option value="cancelada">Cancelada</option>
+</select>
+
+<button type="submit">Guardar</button>
+
+</form>
+
+</body>
+</html>
