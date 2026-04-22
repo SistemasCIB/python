@@ -4,10 +4,12 @@ from webhook import webhook_bp
 from asesor import asesor_bp
 from config import SECRET_KEY
 from datetime import datetime
-
+import os
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = \
-'postgresql://postgres:cib2526@localhost:5432/metapython'
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv(
+    "DATABASE_URL",
+    "postgresql://postgres:cib2526@localhost:5432/metapython"
+)
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SECRET_KEY'] = SECRET_KEY
 
