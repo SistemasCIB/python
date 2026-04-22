@@ -26,10 +26,10 @@ def dentro_de_horario():
 
 def manejar_boton(numero, opcion_id):
     # ── Paciente o Cliente ──
-    if opcion_id == 'paciente':
+    if opcion_id == 'soy_paciente':
         enviar_politica_datos(numero)
         return
-    elif opcion_id == 'cliente':
+    elif opcion_id == 'soy_cliente':
         enviar_texto(
             numero,
             f"Para atención comercial comunícate al siguiente LINK:\n\n{LINK_ASESOR}"
