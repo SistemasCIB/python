@@ -125,8 +125,8 @@ def manejar_boton(numero, opcion_id):
             del sesiones[numero]
         enviar_texto(numero,
             "Cuando tengas los requisitos listos, con gusto te agendamos.\n"
-            "Si necesitas ayuda escribe al asesor:"
-            f"\n{LINK_ASESOR}"
+            
+            
         )
         enviar_menu(numero)
 
