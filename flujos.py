@@ -146,7 +146,7 @@ def manejar_boton(numero, opcion_id):
 
 
 def manejar_texto(numero, texto):
-    
+
     # si esta en modo humano, el bot no responde
     sesion = sesiones.get(numero, {})
     if sesion.get('modo') == 'humano':

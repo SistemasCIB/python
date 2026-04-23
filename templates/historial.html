@@ -1,0 +1,21 @@
+<h2>Historial de acciones</h2>
+
+<table border="1">
+<tr>
+<th>Fecha</th>
+<th>Asesor</th>
+<th>Acción</th>
+<th>Cita</th>
+<th>Detalle</th>
+</tr>
+
+{% for l in logs %}
+<tr>
+<td>{{ l.fecha.strftime('%d/%m/%Y %H:%M') }}</td>
+<td>{{ l.asesor_nombre }}</td>
+<td>{{ l.accion }}</td>
+<td>{{ l.cita_id }}</td>
+<td>{{ l.detalle }}</td>
+</tr>
+{% endfor %}
+</table>

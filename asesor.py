@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, request, redirect, url_for, session, jsonify
-from models import db, Cita, Asesor
+from models import db, Cita, Asesor, Auditoria
 from mensajes import enviar_texto
 from config import HORARIO_INICIO, HORARIO_FIN
 import io, csv
@@ -53,6 +53,16 @@ def confirmar_cita(cita_id):
     if cita:
         cita.estado = 'confirmada'
         db.session.commit()
+        log = Auditoria(
+            asesor_id=session['asesor_id'],
+            asesor_nombre=session['asesor_nombre'],
+            accion='confirmo',
+            cita_id=cita.id,
+            detalle=f'Confirmó cita de {cita.nombre}'
+        )
+        db.session.add(log)
+        db.session.commit()
+
         enviar_texto(cita.numero_whatsapp,
             f"Tu cita ha sido CONFIRMADA!\n\n"
             f"Tipo: {cita.tipo_cita.capitalize()}\n"
@@ -69,6 +79,16 @@ def rechazar_cita(cita_id):
     if cita:
         cita.estado = 'rechazada'
         db.session.commit()
+        log = Auditoria(
+            asesor_id=session['asesor_id'],
+            asesor_nombre=session['asesor_nombre'],
+            accion='rechazo',
+            cita_id=cita.id,
+            detalle=f'Rechazó cita de {cita.nombre}'
+        )
+        db.session.add(log)                                 
+        db.session.commit()
+
         enviar_texto(cita.numero_whatsapp,
             f"Lo sentimos, tu solicitud de cita no pudo ser confirmada.\n\n"
             f"Para mas informacion contacta a nuestros asesores."
@@ -113,6 +133,17 @@ def nueva_cita():
         db.session.add(cita)
         db.session.commit()
 
+        log = Auditoria(
+            asesor_id=session['asesor_id'],
+            asesor_nombre=session['asesor_nombre'],
+            accion='creo_manual',
+            cita_id=cita.id,
+            detalle=f'Creó cita manual para {cita.nombre}'
+        )
+
+        db.session.add(log)
+        db.session.commit()
+
         return redirect(url_for('asesor.panel'))
 
     return render_template('form_cita.html', cita=None)
@@ -135,6 +166,23 @@ def editar_cita(cita_id):
 
         db.session.commit()
 
+        log = Auditoria(
+            asesor_id=session['asesor_id'],
+            asesor_nombre=session['asesor_nombre'],
+            accion='editó',
+            cita_id=cita.id,
+            detalle=f'Editó cita de {cita.nombre}'
+        )
+
+        db.session.add(log)
+        db.session.commit()
+
         return redirect(url_for('asesor.panel'))
 
     return render_template('form_cita.html', cita=cita)
+
+@asesor_bp.route('/asesor/historial')
+@login_requerido
+def historial():
+    logs = Auditoria.query.order_by(Auditoria.fecha.desc()).all()
+    return render_template('historial.html', logs=logs)

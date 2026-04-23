@@ -20,6 +20,7 @@ class Cita(db.Model):
     numero_whatsapp = db.Column(db.String(20))
     estado = db.Column(db.String(20), default='pendiente')  # pendiente / confirmada / rechazada / cancelada
     creada_en = db.Column(db.DateTime, default=datetime.utcnow)
+ 
 
 class Consentimiento(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -47,3 +48,20 @@ def agregar_mensajes_log(texto):
     except Exception as e:
         db.session.rollback()
         print(f"Error log: {str(e)}")
+
+class Conversacion(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    numero_whatsapp = db.Column(db.String(20), unique=True)
+    modo = db.Column(db.String(20), default='bot')   # bot / humano
+    vence_humano = db.Column(db.DateTime, nullable=True)
+    actualizada = db.Column(db.DateTime, default=datetime.utcnow)
+
+
+class Auditoria(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    asesor_id = db.Column(db.Integer)
+    asesor_nombre = db.Column(db.String(100))
+    accion = db.Column(db.String(50))
+    cita_id = db.Column(db.Integer, nullable=True)
+    detalle = db.Column(db.Text)
+    fecha = db.Column(db.DateTime, default=datetime.utcnow)        
