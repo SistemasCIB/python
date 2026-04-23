@@ -225,9 +225,9 @@ textarea{
 
                 <div>
                     <label>Fecha solicitada</label>
-                    <input type="text" name="fecha_cita"
+                    <input type="date" name="fecha_cita"
                            value="{{ cita.fecha_cita if cita else '' }}"
-                           placeholder="Ej: Lunes 27 de Abril">
+                           required>
                 </div>
 
                 <div>
