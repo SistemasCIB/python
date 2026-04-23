@@ -154,27 +154,7 @@
             <div class="stat-card">
                 <div class="label">Total citas</div>
                 <div class="value">{{ citas|length }}</div>
-
-            <div class="stat-card">
-                <div class="label">Pendientes</div>
-                <div class="value">{{ citas|selectattr('estado', 'equalto', 'pendiente')|list|length }}</div>
             </div>
-
-            <div class="stat-card">
-                <div class="label">Confirmadas</div>
-                <div class="value">{{ citas|selectattr('estado', 'equalto', 'confirmada')|list|length }}</div>       
-            </div>
-
-            <div class="stat-card">
-                <div class="label">Rechazadas</div>
-                <div class="value">{{ citas|selectattr('estado', 'equalto', 'rechazada')|list|length }}</div>
-            </div>
-
-            <div class="stat-card">
-                <div class="label">Canceladas</div>
-                <div class="value">{{ citas|selectattr('estado', 'equalto', 'cancelada')|list|length }}</div>
-            </div>
-
             <div class="stat-card">
                 <div class="label">Consentimientos</div>
                 <div class="value">{{ consentimientos|selectattr('acepto', 'equalto', True)|list|length }}</div>
