@@ -146,6 +146,12 @@ def manejar_boton(numero, opcion_id):
 
 
 def manejar_texto(numero, texto):
+    
+    # si esta en modo humano, el bot no responde
+    sesion = sesiones.get(numero, {})
+    if sesion.get('modo') == 'humano':
+        return
+        
     if numero not in sesiones:
         consentimiento = Consentimiento.query.filter_by(
             numero_whatsapp=numero, acepto=True
@@ -215,9 +221,8 @@ def confirmar_cita(numero):
         db.session.rollback()
         agregar_mensajes_log(f"Error cita: {str(e)}")
     finally:
-        if numero in sesiones:
-            del sesiones[numero]
-        enviar_menu(numero)
+        sesiones[numero] ={"modo" : "humano"}
+        
 
 
 def buscar_y_cancelar_cita(numero, documento):
