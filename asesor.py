@@ -1,5 +1,6 @@
 from flask import Blueprint, render_template, request, redirect, url_for, session, jsonify
-from models import db, Cita, Asesor, Auditoria
+from models import db, Cita, Asesor, Auditoria, ChatActivo
+from datetime import datetime, timedelta
 from mensajes import enviar_texto
 from config import HORARIO_INICIO, HORARIO_FIN
 import io, csv
@@ -192,3 +193,44 @@ def historial():
         logs=logs,
         asesor_nombre=session.get('asesor_nombre')
     )
+
+@asesor_bp.route('/asesor/tomar_chat/<int:cita_id>')
+@login_requerido
+def tomar_chat(cita_id):
+
+    cita = Cita.query.get_or_404(cita_id)
+
+    chat = ChatActivo.query.filter_by(numero=cita.numero_whatsapp).first()
+
+    if not chat:
+        chat = ChatActivo(
+            numero=cita.numero_whatsapp,
+            asesor_id=session['asesor_id'],
+            asesor_nombre=session['asesor_nombre'],
+            activo=True,
+            vence_en=datetime.utcnow() + timedelta(hours=24)
+        )
+        db.session.add(chat)
+    else:
+        chat.activo = True
+        chat.asesor_id = session['asesor_id']
+        chat.asesor_nombre = session['asesor_nombre']
+        chat.vence_en = datetime.utcnow() + timedelta(hours=24)
+
+    db.session.commit()
+
+    return redirect(url_for('asesor.panel'))
+
+@asesor_bp.route('/asesor/liberar_chat/<int:cita_id>')
+@login_requerido
+def liberar_chat(cita_id):
+
+    cita = Cita.query.get_or_404(cita_id)
+
+    chat = ChatActivo.query.filter_by(numero=cita.numero_whatsapp).first()
+
+    if chat:
+        db.session.delete(chat)
+        db.session.commit()
+
+    return redirect(url_for('asesor.panel'))

@@ -25,6 +25,11 @@ def dentro_de_horario():
     return 7 <= ahora.hour < 17
 
 def manejar_boton(numero, opcion_id):
+
+    sesion = sesiones.get(numero, {})
+    if sesion.get('modo') == 'humano':
+        return
+
     # ── Paciente o Cliente ──
     if opcion_id == 'soy_paciente':
         enviar_politica_datos(numero)
@@ -146,6 +151,20 @@ def manejar_boton(numero, opcion_id):
 
 
 def manejar_texto(numero, texto):
+    from models import ChatActivo
+    from datetime import datetime
+    chat = ChatActivo.query.filter_by(
+        numero=numero,
+        activo=True
+    ).first()
+
+    if chat:
+        if chat.vence_en > datetime.utcnow():
+            return
+        else:
+            # venció el tiempo, liberar chat
+            db.session.delete(chat)
+            db.session.commit()
 
     # si esta en modo humano, el bot no responde
     sesion = sesiones.get(numero, {})
@@ -221,7 +240,8 @@ def confirmar_cita(numero):
         db.session.rollback()
         agregar_mensajes_log(f"Error cita: {str(e)}")
     finally:
-        sesiones[numero] ={"modo" : "humano"}
+        sesiones[numero] = sesiones.get(numero, {})
+        sesiones[numero]['modo'] = 'humano'
         
 
 

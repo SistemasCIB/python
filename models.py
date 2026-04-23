@@ -65,3 +65,12 @@ class Auditoria(db.Model):
     cita_id = db.Column(db.Integer, nullable=True)
     detalle = db.Column(db.Text)
     fecha = db.Column(db.DateTime, default=datetime.utcnow)        
+
+class ChatActivo(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    numero = db.Column(db.String(20), unique=True)
+    asesor_id = db.Column(db.Integer)
+    asesor_nombre = db.Column(db.String(100))
+    activo = db.Column(db.Boolean, default=True)
+    creado_en = db.Column(db.DateTime, default=datetime.utcnow)
+    vence_en = db.Column(db.DateTime)
