@@ -124,7 +124,7 @@ def manejar_boton(numero, opcion_id):
         if numero in sesiones:
             del sesiones[numero]
         enviar_texto(numero,
-            "Cuando tengas los requisitos listos, con gusto te agendamos.\n"
+            "podras reangendar tu cita cuando cumplas con los requisitos necesarios.\n\n"
             
             
         )

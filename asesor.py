@@ -234,3 +234,4 @@ def liberar_chat(cita_id):
         db.session.commit()
 
     return redirect(url_for('asesor.panel'))
+
