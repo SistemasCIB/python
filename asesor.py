@@ -184,5 +184,11 @@ def editar_cita(cita_id):
 @asesor_bp.route('/asesor/historial')
 @login_requerido
 def historial():
+
     logs = Auditoria.query.order_by(Auditoria.fecha.desc()).all()
-    return render_template('historial.html', logs=logs)
+
+    return render_template(
+        'historial.html',
+        logs=logs,
+        asesor_nombre=session.get('asesor_nombre')
+    )
