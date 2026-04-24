@@ -8,7 +8,7 @@ import os
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv(
     "DATABASE_URL",
-    "postgresql://metapython_user:tyrmzBpjlM6tyB2ZNNQjyE769BLh7jGs@dpg-d7kinou7r5hc73eirf00-a.virginia-postgres.render.com/metapython"
+    "postgresql://cib:SrwKzGzCk16fdhiZg7IX4LrPaN6md0Gd@dpg-d7lt8k8g4nts739eph4g-a.virginia-postgres.render.com/cib"
 )
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SECRET_KEY'] = SECRET_KEY
