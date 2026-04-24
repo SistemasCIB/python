@@ -6,24 +6,30 @@ from config import SECRET_KEY
 from datetime import datetime
 import os
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv(
-    "DATABASE_URL",
-    "postgresql://cib:SrwKzGzCk16fdhiZg7IX4LrPaN6md0Gd@dpg-d7lt8k8g4nts739eph4g-a.virginia-postgres.render.com/cib"
-)
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['SECRET_KEY'] = SECRET_KEY
 
-db.init_app(app)
-app.register_blueprint(webhook_bp)
-app.register_blueprint(asesor_bp)
+if os.getenv("RENDER"):
+    # Cuando corre en Render
+    app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URL")
+else:
+    # Cuando corre en tu PC local
+    app.config["SQLALCHEMY_DATABASE_URI"] = "postgresql://postgres:cib2526@localhost:5432/metapython"
+
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+app.config["SECRET_KEY"] = os.getenv("SECRET_KEY", "clave_local_segura")
+
 app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
     "pool_pre_ping": True,
     "pool_recycle": 300,
     "pool_timeout": 30
 }
 
+
+
+db.init_app(app)
+app.register_blueprint(webhook_bp)
+app.register_blueprint(asesor_bp)
+
 with app.app_context():
-   
     db.create_all()
     # Crear asesor por defecto si no existe
     if not Asesor.query.filter_by(usuario='admin').first():
