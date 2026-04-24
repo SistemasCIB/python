@@ -238,7 +238,7 @@ def manejar_texto(numero, texto):
         elif paso == 'telefono':
             sesiones[numero]['telefono'] = texto
             sesiones[numero]['paso'] = 'correo'
-            mostrar_fechas_disponibles(numero, "Escribe tu correo electronico:")
+            enviar_texto(numero, "Escribe tu correo electronico:")
 
         elif paso == 'correo':
             sesiones[numero]['correo'] = texto
@@ -268,6 +268,7 @@ def confirmar_cita(numero):
             tipo_cita=sesion.get('tipo_cita', ''),
             motivo=sesion.get('motivo', ''),
             fecha_cita=sesion.get('fecha_cita', ''),
+            hora_cita=sesion.get('hora_cita', ''),
             numero_whatsapp=numero,
             estado='pendiente'
         )
@@ -283,6 +284,7 @@ def confirmar_cita(numero):
             f"Direccion: {nueva_cita.direccion}\n"
             f"Tipo: {nueva_cita.tipo_cita.capitalize()}\n"
             f"Fecha solicitada: {nueva_cita.fecha_cita}\n"
+            f"Hora solicitada: {nueva_cita.hora_cita}\n"
             f"Motivo: {nueva_cita.motivo}\n\n"
             f"Un asesor confirmara tu cita pronto."
         )

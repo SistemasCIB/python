@@ -23,6 +23,7 @@ app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
 }
 
 with app.app_context():
+   
     db.create_all()
     # Crear asesor por defecto si no existe
     if not Asesor.query.filter_by(usuario='admin').first():
