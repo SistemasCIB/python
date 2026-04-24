@@ -16,6 +16,11 @@ app.config['SECRET_KEY'] = SECRET_KEY
 db.init_app(app)
 app.register_blueprint(webhook_bp)
 app.register_blueprint(asesor_bp)
+app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
+    "pool_pre_ping": True,
+    "pool_recycle": 300,
+    "pool_timeout": 30
+}
 
 with app.app_context():
     db.create_all()
