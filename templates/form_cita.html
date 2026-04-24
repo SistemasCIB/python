@@ -229,6 +229,18 @@ textarea{
                            value="{{ cita.fecha_cita if cita else '' }}"
                            required>
                 </div>
+                <div>
+                    <label>Hora solicitada</label>
+                    <select name="hora_cita" required>
+                        {% for hora in ['07:00', '08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00'] %}
+                        <option value="{{ hora }}"
+                        {% if cita and cita.hora_cita == hora %}selected{% endif %}>
+                        {{ hora }}
+                        </option>
+                        {% endfor %}
+                            
+
+
 
                 <div>
                     <label>Estado</label>

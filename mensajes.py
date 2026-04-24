@@ -44,8 +44,8 @@ def enviar_menu(numero):
                     "title": "Menu principal",
                     "rows": [
                         {"id": "agendar",  "title": "Agendar Cita",  "description": "Programa una nueva cita"},
-                        {"id": "cancelar", "title": "Cancelar Cita", "description": "Cancela una cita existente"},
-                        {"id": "asesoria", "title": "Asesoria",      "description": "Habla con un asesor"},
+                        {"id": "resultados", "title": "Consultar Resultados", "description": "Consulta el estado o entrega de tus resultados"},
+                        {"id": "otros", "title": "Otros servicios", "description": "Informacion sobre nuestros servicios"},
                         {"id": "terminar", "title": "Finalizar",     "description": "Terminar la conversacion"}
                     ]
                 }]
@@ -64,9 +64,15 @@ def enviar_bienvenida(numero):
             "type": "button",
             "body": {
                 "text": (
-                    "Bienvenido a la Corporacion para Investigaciones "
-                    "Biologicas - CIB 👋\n\n"
-                    "Antes de continuar, selecciona el tipo de usuario:"
+                    "👋¡Bienvenido(a) a la Corporación para Investigaciones Biológicas (CIB)!\n\n "
+                    "Somos un laboratorio especializado en diagnóstico, investigación, servicios en salud y otros servicios 🧪\n\n"
+                    "Estamos aquí para ayudarte con:\n"
+                    "- Agendar citas\n"
+                    "- Consulta de resultados\n"
+                    "- Información sobre nuestros servicios\n\n"
+                    "📌 Para brindarte una mejor atención, sigue las opciones que te indicaremos a continuación.\n\n"
+                    "¡Gracias por confiar en nosotros!💙\n"
+                    "Antes de continuar, por favor indícanos si eres paciente o cliente:"
                 )
             },
             "action": {
@@ -75,14 +81,14 @@ def enviar_bienvenida(numero):
                         "type": "reply",
                         "reply": {
                             "id": "soy_paciente",
-                            "title": "Paciente"
+                            "title": "Paciente: Persona que necesita un examen, quiere agendar una cita o consultar resultados para sí mismo o un familiar."
                         }
                     },
                     {
                         "type": "reply",
                         "reply": {
                             "id": "soy_cliente",
-                            "title": "Cliente"
+                            "title": "Cliente: Empresa o profesional (IPS, médico, laboratorio, aseguradora) que solicita información, envía muestras o tiene convenio con nosotros."
                         }
                     }
                 ]
@@ -97,9 +103,11 @@ def enviar_politica_datos(numero):
 
     enviar_texto(
         numero,
-        "Antes de continuar, por favor lee nuestra Politica de "
-        "Tratamiento y Proteccion de Datos Personales:\n\n"
-        f"{URL_BASE}/politica"
+        "📄 Protección de datos personale\n\n "
+        "Tus datos serán tratados conforme a la Ley 1581 de 2012 y el Decreto 1377 de 2013.\n"
+        "Serán usados únicamente para la prestación de nuestros servicios de salud.\n\n"
+        "Consulta nuestra política aquí:\n"
+         f" {URL_BASE}/politica"
     )
 
     data = {
@@ -209,6 +217,66 @@ def mostrar_fechas_disponibles(numero, sesiones):
         }
     }
     enviar_request(data)
+
+def mostrar_horas_disponibles(numero):
+
+    horas = [
+        "07:00", "08:00", "09:00", "10:00",
+        "11:00", "12:00", "13:00", "14:00",
+        "15:00", "16:00"
+    ]
+
+    botones = []
+
+    for i, h in enumerate(horas):
+        botones.append({
+            "type": "reply",
+            "reply": {
+                "id": f"hora_{i+1}",
+                "title": h
+            }
+        })
+
+    data = {
+        "messaging_product": "whatsapp",
+        "recipient_type": "individual",
+        "to": numero,
+        "type": "interactive",
+        "interactive": {
+            "type": "button",
+            "body": {"text": "Selecciona una hora disponible:"},
+            "action": {"buttons": botones[:3]}
+        }
+    }
+
+    enviar_request(data) 
+    
+def enviar_tipo_documento(numero):
+    data = {
+        "messaging_product": "whatsapp",
+        "recipient_type": "individual",
+        "to": numero,
+        "type": "interactive",
+        "interactive": {
+            "type": "list",
+            "body": {"text": "Selecciona el tipo de documento de identificacion:"},
+            "action": {
+                "button": "Ver tipos",
+                "sections": [{
+                    "title": "Tipo de documento",
+                    "rows": [
+                        {"id": "tdoc_CC",   "title": "CC",  "description": "Cedula de ciudadania"},
+                        {"id": "tdoc_TI",   "title": "TI",  "description": "Tarjeta de identidad"},
+                        {"id": "tdoc_CE",   "title": "CE",  "description": "Cedula de extranjeria"},
+                        {"id": "tdoc_PPT",  "title": "PPT", "description": "Permiso de proteccion temporal"},
+                        {"id": "tdoc_RC",   "title": "RC",  "description": "Registro civil"},
+                        {"id": "tdoc_Otro", "title": "Otro","description": "Otro tipo de documento"}
+                    ]
+                }]
+            }
+        }
+    }
+    enviar_request(data)    
 
 def enviar_fuera_horario(numero):
     from config import HORARIO_INICIO, HORARIO_FIN

@@ -12,11 +12,15 @@ class Log(db.Model):
 class Cita(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     nombre = db.Column(db.String(100))
+    tipo_documento = db.Column(db.String(20))
     documento = db.Column(db.String(50))
+    correo = db.Column(db.String(100))
+    direccion = db.Column(db.String(200))
     telefono = db.Column(db.String(20))
     tipo_cita = db.Column(db.String(20))        # presencial / domicilio
     motivo = db.Column(db.TEXT)
     fecha_cita = db.Column(db.String(50))
+    hora_cita = db.Column(db.String(20))
     numero_whatsapp = db.Column(db.String(20))
     estado = db.Column(db.String(20), default='pendiente')  # pendiente / confirmada / rechazada / cancelada
     creada_en = db.Column(db.DateTime, default=datetime.utcnow)
