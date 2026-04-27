@@ -18,7 +18,11 @@ class Cita(db.Model):
     direccion = db.Column(db.String(200))
     telefono = db.Column(db.String(20))
     tipo_cita = db.Column(db.String(20))        # presencial / domicilio
-    motivo = db.Column(db.TEXT)
+    orden_medica = db.Column(db.String(500))
+    orden_tipo_archivo = db.Column(db.String(50))   # NUEVO  ej: image/jpeg, application/pdf
+    cobertura = db.Column(db.String(50))            # NUEVO  Particular / Poliza
+    aseguradora = db.Column(db.String(100))         # NUEVO  Sura / Coomeva / etc
+    tipo_examen = db.Column(db.String(300))         #nombre del examen
     fecha_cita = db.Column(db.String(50))
     hora_cita = db.Column(db.String(20))
     numero_whatsapp = db.Column(db.String(20))

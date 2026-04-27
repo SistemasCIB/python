@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
 from models import db, Log, agregar_mensajes_log
-from flujos import manejar_boton, manejar_texto
+from flujos import manejar_boton, manejar_texto, manejar_archivo
 from config import TOKEN_ANDERCODE
 import json
 
@@ -62,6 +62,14 @@ def recibir_mensaje(req):
                # log limpio
                 agregar_mensajes_log(f"Mensaje | {nombre} | {numero} | {texto}")
                 manejar_texto(numero, texto)
+
+            elif tipo in ['image', 'document']:
+                media = mensaje.get(tipo,{})
+                media_id = media.get('id', '')
+                tipo_mime = media.get('mime_type', tipo)
+                agregar_mensajes_log(f"Archivo recibido | {numero} | Tipo: {tipo_mime} | Media ID: {media_id}")
+                manejar_archivo(numero, media_id, tipo_mime)
+               
 
         return jsonify({'message': 'EVENT_RECEIVED'})
     except Exception as e:

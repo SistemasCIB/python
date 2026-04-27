@@ -283,10 +283,7 @@ def enviar_fuera_horario(numero):
         f"Por favor contactanos en ese horario. ¡Gracias!"
     )
 
-# ==============================
-# NUEVAS FUNCIONES (AGREGAR AL FINAL DE mensajes.py)
-# NO MODIFICAN LO EXISTENTE
-# ==============================
+
 
 def enviar_tipo_cobertura(numero):
     data = {

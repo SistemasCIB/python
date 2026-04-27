@@ -353,21 +353,34 @@ def manejar_texto(numero, texto):
     # -----------------------------------
     elif paso == "direccion":
         sesiones[numero]["direccion"] = texto
-        sesiones[numero]["paso"] = "motivo"
+        sesiones[numero]["paso"] = "orden"
 
         enviar_texto(
             numero,
-            "Indica el motivo de tu cita:"
+            "📄 Ahora adjunta la orden médica.\n\n"
+            "Puedes enviarla en PDF o foto.\n"
+            "Un asesor la revisará para confirmar tu cita."
         )
         return
 
     # -----------------------------------
-    # MOTIVO
+    # ORDEN
     # -----------------------------------
-    elif paso == "motivo":
-        sesiones[numero]["motivo"] = texto
-        confirmar_cita(numero)
+    elif paso == "orden":
+        enviar_texto(
+            numero,
+            "Por favor envía la orden como foto 📷 o archivo PDF 📄, no como texto."
+        )
         return
+def manejar_archivo(numero, media_id, tipo_mime):
+    if numero not in sesiones:
+        return
+    if sesiones[numero].get("paso") != "orden":
+        return
+
+    sesiones[numero]["orden"]        = media_id   # ← clave consistente
+    sesiones[numero]["tipo_archivo"] = tipo_mime
+    confirmar_cita(numero)
 
 
 # =====================================================
@@ -388,8 +401,9 @@ def confirmar_cita(numero):
             correo=sesion.get("correo", ""),
             direccion=sesion.get("direccion", ""),
             tipo_cita=sesion.get("tipo_cita", ""),
-            motivo=sesion.get("motivo", ""),
+            orden_medica=sesion.get("orden",""),
             fecha_cita=sesion.get("fecha_cita", ""),
+            orden_tipo_archivo = sesion.get("tipo_archivo", ""),
             numero_whatsapp=numero,
             estado="pendiente"
         )
