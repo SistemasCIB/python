@@ -5,11 +5,10 @@ from asesor import asesor_bp
 from config import SECRET_KEY
 from datetime import datetime
 import os
+from flask_sqlalchemy import SQLAlchemy
+
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv(
-    "DATABASE_URL",
-    "postgresql://metapython:GrltBpWuunwQjtJaeNqnNI0QghF4lPVn@dpg-d7ltlr2pmmbs73fqjrl0-a.virginia-postgres.render.com/metapython_69tt"
-)
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///cib.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SECRET_KEY'] = SECRET_KEY
 
