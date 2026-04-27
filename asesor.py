@@ -3,8 +3,9 @@ from models import db, Cita, Asesor, Auditoria, ChatActivo
 from datetime import datetime, timedelta
 from mensajes import enviar_texto
 from config import HORARIO_INICIO, HORARIO_FIN
-import io, csv
+import io, csv, os
 from flask import Response
+from werkzeug.utils import secure_filename
 
 asesor_bp = Blueprint('asesor', __name__)
 
@@ -68,7 +69,7 @@ def confirmar_cita(cita_id):
             f"Tu cita ha sido CONFIRMADA!\n\n"
             f"Tipo: {cita.tipo_cita.capitalize()}\n"
             f"Fecha: {cita.fecha_cita}\n"
-            f"Motivo: {cita.motivo}\n\n"
+            f"Orden Médica: {cita.orden_medica}\n\n"
             f"Te esperamos. Horario: {HORARIO_INICIO}am a {HORARIO_FIN}pm."
         )
     return redirect(url_for('asesor.panel'))
@@ -102,10 +103,10 @@ def exportar_excel():
     citas = Cita.query.order_by(Cita.creada_en.desc()).all()
     output = io.StringIO()
     writer = csv.writer(output)
-    writer.writerow(['ID','Nombre','Documento','Telefono','Tipo','Motivo','Fecha','WhatsApp','Estado','Registrada'])
+    writer.writerow(['ID','Nombre','Documento','Telefono','Tipo','Orden Médica','Fecha','WhatsApp','Estado','Registrada'])
     for c in citas:
         writer.writerow([c.id, c.nombre, c.documento, c.telefono,
-                        c.tipo_cita, c.motivo, c.fecha_cita,
+                        c.tipo_cita, c.orden_medica, c.fecha_cita,
                         c.numero_whatsapp, c.estado,
                         c.creada_en.strftime('%d/%m/%Y %H:%M')])
     output.seek(0)
@@ -120,16 +121,25 @@ def nueva_cita():
 
     if request.method == 'POST':
 
+        archivo = request.files.get('orden_medica')
+        nombre_archivo = ''
+
+        if archivo and archivo.filename != '':
+            nombre_archivo = secure_filename(archivo.filename)
+            ruta = os.path.join('uploads', nombre_archivo)
+            archivo.save(ruta)
+
         cita = Cita(
             nombre=request.form['nombre'],
             documento=request.form['documento'],
             telefono=request.form['telefono'],
             tipo_cita=request.form['tipo_cita'],
-            motivo=request.form['motivo'],
+            orden_medica=nombre_archivo,
             fecha_cita=request.form['fecha_cita'],
             numero_whatsapp=request.form['telefono'],
             estado=request.form['estado']
         )
+        
 
         db.session.add(cita)
         db.session.commit()
@@ -156,14 +166,21 @@ def editar_cita(cita_id):
     cita = Cita.query.get_or_404(cita_id)
 
     if request.method == 'POST':
-
         cita.nombre = request.form['nombre']
         cita.documento = request.form['documento']
         cita.telefono = request.form['telefono']
         cita.tipo_cita = request.form['tipo_cita']
-        cita.motivo = request.form['motivo']
         cita.fecha_cita = request.form['fecha_cita']
         cita.estado = request.form['estado']
+
+        archivo = request.files.get('orden_medica')
+
+        if archivo and archivo.filename != '':
+            nombre_archivo = secure_filename(archivo.filename)
+            ruta = os.path.join('uploads', nombre_archivo)
+            archivo.save(ruta)
+
+            cita.orden_medica = nombre_archivo
 
         db.session.commit()
 
