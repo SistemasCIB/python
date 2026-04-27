@@ -6,14 +6,15 @@ from models import agregar_mensajes_log
 def enviar_request(data):
     headers = {
         'Content-Type': 'application/json',
-        'Authorization': 'Bearer EAAY5YGNZBIz8BRXwA8UTEa16UrRYq3UZAoinyvHxjyXzLsaGAfimXp6qWUD4ZBlMOMywI3nTV3Oet56Ov2L697IbfXA6l8FOwpNvUoXtM0iwS8INTFrq7mpEKBB9rLq3kJXgzRQlv9Ffd2q8ZCRZC8XVYR0opra2ydz68qEfHmCBs0F9ie4AcYtYEGEpDEQZDZD'
+        'Authorization': f'Bearer {TOKEN_META}'
     }
     connection = http.client.HTTPSConnection('graph.facebook.com')
     try:
         connection.request('POST', f'/v25.0/{PHONE_NUMBER_ID}/messages', json.dumps(data), headers)
         response = connection.getresponse()
+        body = response.read()
         if response.status != 200:
-            agregar_mensajes_log(f"Error envio | {response.status} {response.reason}")
+            agregar_mensajes_log(f"Error envio | {response.status} {response.reason} | {body.decode('utf-8', errors='replace')}")
     except Exception as e:
         agregar_mensajes_log(f"Error envio: {str(e)}")
     finally:
@@ -43,10 +44,10 @@ def enviar_menu(numero):
                 "sections": [{
                     "title": "Menu principal",
                     "rows": [
-                        {"id": "agendar",  "title": "Agendar Cita",  "description": "Programa una nueva cita"},
-                        {"id": "resultados", "title": "Consultar Resultados", "description": "Consulta el estado o entrega de tus resultados"},
-                        {"id": "otros", "title": "Otros servicios", "description": "Informacion sobre nuestros servicios"},
-                        {"id": "terminar", "title": "Finalizar",     "description": "Terminar la conversacion"}
+                        {"id": "agendar",    "title": "Agendar Cita",       "description": "Programa una nueva cita"},
+                        {"id": "resultados", "title": "Ver Resultados",      "description": "Consulta el estado o entrega de tus resultados"},
+                        {"id": "otros",      "title": "Otros servicios",     "description": "Informacion sobre nuestros servicios"},
+                        {"id": "terminar",   "title": "Finalizar",           "description": "Terminar la conversacion"}
                     ]
                 }]
             }
@@ -64,15 +65,17 @@ def enviar_bienvenida(numero):
             "type": "button",
             "body": {
                 "text": (
-                    "👋¡Bienvenido(a) a la Corporación para Investigaciones Biológicas (CIB)!\n\n "
-                    "Somos un laboratorio especializado en diagnóstico, investigación, servicios en salud y otros servicios 🧪\n\n"
-                    "Estamos aquí para ayudarte con:\n"
+                    "👋 ¡Bienvenido(a) a la Corporación para Investigaciones Biológicas (CIB)!\n\n"
+                    "Somos un laboratorio especializado en diagnóstico, investigación y servicios en salud 🧪\n\n"
+                    "Podemos ayudarte con:\n"
                     "- Agendar citas\n"
                     "- Consulta de resultados\n"
                     "- Información sobre nuestros servicios\n\n"
-                    "📌 Para brindarte una mejor atención, sigue las opciones que te indicaremos a continuación.\n\n"
-                    "¡Gracias por confiar en nosotros!💙\n"
-                    "Antes de continuar, por favor indícanos si eres paciente o cliente:"
+                    "📌 Sigue las opciones que te indicaremos a continuación.\n\n"
+                    "¡Gracias por confiar en nosotros! 💙\n\n"
+                    "Por favor indícanos quién eres:\n\n"
+                    "🔹 Paciente: persona que necesita un examen, agendar cita o consultar resultados para sí mismo o un familiar.\n\n"
+                    "🔹 Cliente: empresa o profesional (IPS, médico, laboratorio, aseguradora) con convenio o solicitud institucional."
                 )
             },
             "action": {
@@ -81,33 +84,32 @@ def enviar_bienvenida(numero):
                         "type": "reply",
                         "reply": {
                             "id": "soy_paciente",
-                            "title": "Paciente: Persona que necesita un examen, quiere agendar una cita o consultar resultados para sí mismo o un familiar."
+                            "title": "Soy Paciente"       # ✅ máx 20 caracteres
                         }
                     },
                     {
                         "type": "reply",
                         "reply": {
                             "id": "soy_cliente",
-                            "title": "Cliente: Empresa o profesional (IPS, médico, laboratorio, aseguradora) que solicita información, envía muestras o tiene convenio con nosotros."
+                            "title": "Soy Cliente"        # ✅ máx 20 caracteres
                         }
                     }
                 ]
             }
         }
     }
-
     enviar_request(data)
-    
+
 def enviar_politica_datos(numero):
     from config import URL_BASE
 
     enviar_texto(
         numero,
-        "📄 Protección de datos personale\n\n "
+        "📄 Protección de datos personales\n\n"
         "Tus datos serán tratados conforme a la Ley 1581 de 2012 y el Decreto 1377 de 2013.\n"
         "Serán usados únicamente para la prestación de nuestros servicios de salud.\n\n"
         "Consulta nuestra política aquí:\n"
-         f" {URL_BASE}/politica"
+        f"{URL_BASE}/politica"
     )
 
     data = {
@@ -118,7 +120,7 @@ def enviar_politica_datos(numero):
         "interactive": {
             "type": "button",
             "body": {
-                "text": "Autorizas el tratamiento de tus datos personales?"
+                "text": "¿Autorizas el tratamiento de tus datos personales?"
             },
             "action": {
                 "buttons": [
@@ -126,21 +128,20 @@ def enviar_politica_datos(numero):
                         "type": "reply",
                         "reply": {
                             "id": "acepto_datos",
-                            "title": "Si acepto"
+                            "title": "Si acepto"          # ✅ máx 20 caracteres
                         }
                     },
                     {
                         "type": "reply",
                         "reply": {
                             "id": "no_acepto_datos",
-                            "title": "No acepto"
+                            "title": "No acepto"          # ✅ máx 20 caracteres
                         }
                     }
                 ]
             }
         }
     }
-
     enviar_request(data)
 
 def enviar_tipo_cita(numero):
@@ -151,11 +152,11 @@ def enviar_tipo_cita(numero):
         "type": "interactive",
         "interactive": {
             "type": "button",
-            "body": {"text": "Que tipo de cita necesitas?"},
+            "body": {"text": "¿Qué tipo de cita necesitas?"},
             "action": {
                 "buttons": [
-                    {"type": "reply", "reply": {"id": "tipo_presencial", "title": "Presencial"}},
-                    {"type": "reply", "reply": {"id": "tipo_domicilio",  "title": "Domicilio"}}
+                    {"type": "reply", "reply": {"id": "tipo_presencial", "title": "Presencial"}},  # ✅
+                    {"type": "reply", "reply": {"id": "tipo_domicilio",  "title": "Domicilio"}}    # ✅
                 ]
             }
         }
@@ -173,11 +174,11 @@ def enviar_requisitos(numero, tipo):
         "type": "interactive",
         "interactive": {
             "type": "button",
-            "body": {"text": f"Para una cita {tipo} necesitas:\n\n{lista}\n\n{horario}\n\nCumples con estos requisitos?"},
+            "body": {"text": f"Para una cita {tipo} necesitas:\n\n{lista}\n\n{horario}\n\n¿Cumples con estos requisitos?"},
             "action": {
                 "buttons": [
-                    {"type": "reply", "reply": {"id": "cumple_si", "title": "Si, cumplo"}},
-                    {"type": "reply", "reply": {"id": "cumple_no", "title": "No cumplo"}}
+                    {"type": "reply", "reply": {"id": "cumple_si", "title": "Si, cumplo"}},   # ✅
+                    {"type": "reply", "reply": {"id": "cumple_no", "title": "No cumplo"}}     # ✅
                 ]
             }
         }
@@ -186,9 +187,9 @@ def enviar_requisitos(numero, tipo):
 
 def mostrar_fechas_disponibles(numero, sesiones):
     from datetime import datetime, timedelta
-    DIAS_ES = ["Lunes","Martes","Miercoles","Jueves","Viernes","Sabado","Domingo"]
-    MESES_ES = ["","Enero","Febrero","Marzo","Abril","Mayo","Junio",
-                "Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"]
+    DIAS_ES = ["Lunes", "Martes", "Miercoles", "Jueves", "Viernes", "Sabado", "Domingo"]
+    MESES_ES = ["", "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
+                "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"]
 
     dias = []
     dia = datetime.now() + timedelta(days=1)
@@ -201,7 +202,7 @@ def mostrar_fechas_disponibles(numero, sesiones):
     for i, d in enumerate(dias):
         botones.append({
             "type": "reply",
-            "reply": {"id": f"fecha_{i+1}", "title": d[:20]}
+            "reply": {"id": f"fecha_{i+1}", "title": d[:20]}  # ✅ truncado a 20
         })
     sesiones[numero]['fechas'] = {f"fecha_{i+1}": d for i, d in enumerate(dias)}
 
@@ -219,7 +220,6 @@ def mostrar_fechas_disponibles(numero, sesiones):
     enviar_request(data)
 
 def mostrar_horas_disponibles(numero):
-
     horas = [
         "07:00", "08:00", "09:00", "10:00",
         "11:00", "12:00", "13:00", "14:00",
@@ -227,13 +227,12 @@ def mostrar_horas_disponibles(numero):
     ]
 
     botones = []
-
     for i, h in enumerate(horas):
         botones.append({
             "type": "reply",
             "reply": {
                 "id": f"hora_{i+1}",
-                "title": h
+                "title": h                              # ✅ "07:00" = 5 caracteres
             }
         })
 
@@ -248,9 +247,8 @@ def mostrar_horas_disponibles(numero):
             "action": {"buttons": botones[:3]}
         }
     }
+    enviar_request(data)
 
-    enviar_request(data) 
-    
 def enviar_tipo_documento(numero):
     data = {
         "messaging_product": "whatsapp",
@@ -265,23 +263,22 @@ def enviar_tipo_documento(numero):
                 "sections": [{
                     "title": "Tipo de documento",
                     "rows": [
-                        {"id": "tdoc_CC",   "title": "CC",  "description": "Cedula de ciudadania"},
-                        {"id": "tdoc_TI",   "title": "TI",  "description": "Tarjeta de identidad"},
-                        {"id": "tdoc_CE",   "title": "CE",  "description": "Cedula de extranjeria"},
-                        {"id": "tdoc_PPT",  "title": "PPT", "description": "Permiso de proteccion temporal"},
-                        {"id": "tdoc_RC",   "title": "RC",  "description": "Registro civil"},
-                        {"id": "tdoc_Otro", "title": "Otro","description": "Otro tipo de documento"}
+                        {"id": "tdoc_CC",   "title": "CC",   "description": "Cedula de ciudadania"},
+                        {"id": "tdoc_TI",   "title": "TI",   "description": "Tarjeta de identidad"},
+                        {"id": "tdoc_CE",   "title": "CE",   "description": "Cedula de extranjeria"},
+                        {"id": "tdoc_PPT",  "title": "PPT",  "description": "Permiso de proteccion temporal"},
+                        {"id": "tdoc_RC",   "title": "RC",   "description": "Registro civil"},
+                        {"id": "tdoc_Otro", "title": "Otro", "description": "Otro tipo de documento"}
                     ]
                 }]
             }
         }
     }
-    enviar_request(data)    
+    enviar_request(data)
 
 def enviar_fuera_horario(numero):
-    from config import HORARIO_INICIO, HORARIO_FIN
     enviar_texto(numero,
         f"Nuestros asesores estan disponibles de lunes a viernes "
         f"de {HORARIO_INICIO}am a {HORARIO_FIN}pm.\n\n"
-        f"Por favor contactanos en ese horario. Gracias!"
+        f"Por favor contactanos en ese horario. ¡Gracias!"
     )

@@ -4,14 +4,15 @@ from mensajes import (enviar_texto, enviar_menu, enviar_bienvenida, enviar_tipo_
                       enviar_requisitos, enviar_fuera_horario, enviar_politica_datos
                       )
 from config import LINK_ASESOR, HORARIO_INICIO, HORARIO_FIN, URL_RESULTADOS
+from datetime import datetime, timedelta
 
 
 sesiones = {}
 
+MODO_HUMANO_MINUTOS = 3
+
 
 def dentro_de_horario():
-    from datetime import datetime, timedelta
-
     # Colombia UTC-5
     ahora = datetime.utcnow() - timedelta(hours=5)
 
@@ -25,10 +26,35 @@ def dentro_de_horario():
 
     return 7 <= ahora.hour < 17
 
+
+def verificar_modo_humano(numero):
+    """
+    Retorna True si el número sigue en modo humano activo.
+    Si ya venció el tiempo, limpia el modo y retorna False.
+    """
+    sesion = sesiones.get(numero, {})
+    if sesion.get('modo') != 'humano':
+        return False
+
+    inicio = sesion.get('modo_humano_inicio')
+    if inicio is None:
+        # No tiene timestamp, se lo asignamos ahora por compatibilidad
+        sesiones[numero]['modo_humano_inicio'] = datetime.utcnow()
+        return True
+
+    tiempo_transcurrido = datetime.utcnow() - inicio
+    if tiempo_transcurrido >= timedelta(minutes=MODO_HUMANO_MINUTOS):
+        # Venció: limpiar modo humano
+        agregar_mensajes_log(f"Modo humano vencido para {numero}, liberando sesión.")
+        del sesiones[numero]
+        return False
+
+    return True
+
+
 def manejar_boton(numero, opcion_id):
 
-    sesion = sesiones.get(numero, {})
-    if sesion.get('modo') == 'humano':
+    if verificar_modo_humano(numero):
         return
 
     # ── Paciente o Cliente ──
@@ -50,7 +76,6 @@ def manejar_boton(numero, opcion_id):
             f"Agradecemos su comprensión y colaboración para centralizar la atención y brindarles un mejor servicio.\n\n"
             f"Les informamos que el horario oficial para la asignación de citas es de lunes a viernes {HORARIO_INICIO}am a {HORARIO_FIN}pm.\n"
             f"Las solicitudes realizadas fuera de este horario no podrán ser gestionadas. Por ello, agradecemos que las peticiones se envíen dentro del horario establecido para garantizar una atención oportuna y eficiente."
-
         )
 
     # ── POLÍTICA DE DATOS ──
@@ -84,15 +109,13 @@ def manejar_boton(numero, opcion_id):
 
     # ── MENÚ PRINCIPAL ──
     elif opcion_id == 'agendar':
-       if not dentro_de_horario():
-          enviar_fuera_horario(numero)
-          return
-       sesiones[numero] = {'flujo': 'agendar', 'paso': 'tipo_cita'}
-       enviar_tipo_cita(numero)
-
+        if not dentro_de_horario():
+            enviar_fuera_horario(numero)
+            return
+        sesiones[numero] = {'flujo': 'agendar', 'paso': 'tipo_cita'}
+        enviar_tipo_cita(numero)
 
     elif opcion_id == "resultados":
-
         enviar_texto(
             numero,
             f"Consulta de resultados:\n\n"
@@ -103,48 +126,28 @@ def manejar_boton(numero, opcion_id):
             f"5. Descarga el resultado.\n\n"
             f"Gracias por confiar en nosotros."
         )
-
         enviar_menu(numero)
 
     elif opcion_id == "otros":
-
         enviar_texto(
             numero,
             "Otros servicios:\n\n"
-
             "Fondo editorial CIB\n"
             "3042151025\n"
             "gestorcomercial@cib.org.co\n\n"
-
             "Programa ALIMENTATEC\n"
             "3235865867\n"
             "alimentatec@cib.org.co\n\n"
-
             "Generalidades\n"
             "comunicacionesymercadeo@cib.org.co\n\n"
             "Gracias por confiar en nosotros."
         )
-
         enviar_menu(numero)
 
     elif opcion_id == "terminar":
-
         if numero in sesiones:
             del sesiones[numero]
-
-        enviar_texto(
-            numero,
-            "Gracias por contactarnos. Hasta pronto."
-        )
-   
-
-
-        enviar_menu(numero)
-
-    elif opcion_id == 'terminar':
-        if numero in sesiones:
-            del sesiones[numero]
-        enviar_texto(numero, "Gracias por contactarnos. Hasta pronto!")
+        enviar_texto(numero, "Gracias por contactarnos. Hasta pronto.")
 
     # ── TIPO DE CITA ──
     elif opcion_id == 'tipo_presencial':
@@ -157,7 +160,6 @@ def manejar_boton(numero, opcion_id):
 
     # ── REQUISITOS ──
     elif opcion_id == 'cumple_si':
-        sesion = sesiones.get(numero, {})
         sesiones[numero]['paso'] = 'tipo_documento'
         enviar_tipo_documento(numero)
 
@@ -167,14 +169,11 @@ def manejar_boton(numero, opcion_id):
         sesiones[numero]['paso'] = 'nombre'
         enviar_texto(numero, "Escribe tu numero de documento de identificacion:")
 
-
     elif opcion_id == 'cumple_no':
         if numero in sesiones:
             del sesiones[numero]
         enviar_texto(numero,
-            "podras reangendar tu cita cuando cumplas con los requisitos necesarios.\n\n"
-            
-            
+            "Podras reagendar tu cita cuando cumplas con los requisitos necesarios.\n\n"
         )
         enviar_menu(numero)
 
@@ -190,7 +189,7 @@ def manejar_boton(numero, opcion_id):
 
 def manejar_texto(numero, texto):
     from models import ChatActivo
-    from datetime import datetime
+
     chat = ChatActivo.query.filter_by(
         numero=numero,
         activo=True
@@ -200,15 +199,12 @@ def manejar_texto(numero, texto):
         if chat.vence_en > datetime.utcnow():
             return
         else:
-            # venció el tiempo, liberar chat
             db.session.delete(chat)
             db.session.commit()
 
-    # si esta en modo humano, el bot no responde
-    sesion = sesiones.get(numero, {})
-    if sesion.get('modo') == 'humano':
+    if verificar_modo_humano(numero):
         return
-        
+
     if numero not in sesiones:
         consentimiento = Consentimiento.query.filter_by(
             numero_whatsapp=numero, acepto=True
@@ -292,7 +288,8 @@ def confirmar_cita(numero):
         db.session.rollback()
         agregar_mensajes_log(f"Error cita: {str(e)}")
     finally:
-        sesiones[numero] = sesiones.get(numero, {})
-        sesiones[numero]['modo'] = 'humano'
-
-
+        # Activar modo humano con timestamp
+        sesiones[numero] = {
+            'modo': 'humano',
+            'modo_humano_inicio': datetime.utcnow()
+        }
