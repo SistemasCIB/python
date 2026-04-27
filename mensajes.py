@@ -282,3 +282,172 @@ def enviar_fuera_horario(numero):
         f"de {HORARIO_INICIO}am a {HORARIO_FIN}pm.\n\n"
         f"Por favor contactanos en ese horario. ¡Gracias!"
     )
+
+# ==============================
+# NUEVAS FUNCIONES (AGREGAR AL FINAL DE mensajes.py)
+# NO MODIFICAN LO EXISTENTE
+# ==============================
+
+def enviar_tipo_cobertura(numero):
+    data = {
+        "messaging_product": "whatsapp",
+        "recipient_type": "individual",
+        "to": numero,
+        "type": "interactive",
+        "interactive": {
+            "type": "button",
+            "body": {
+                "text": (
+                    "💳 Tipo de cobertura\n\n"
+                    "Para tu cita indícanos:\n\n"
+                    "🔹 Particular: Pagas directamente el valor del examen.\n"
+                    "🔹 Póliza: Atención por aseguradora.\n\n"
+                    "Selecciona una opción:"
+                )
+            },
+            "action": {
+                "buttons": [
+                    {
+                        "type": "reply",
+                        "reply": {
+                            "id": "cobertura_particular",
+                            "title": "Particular"
+                        }
+                    },
+                    {
+                        "type": "reply",
+                        "reply": {
+                            "id": "cobertura_poliza",
+                            "title": "Poliza"
+                        }
+                    }
+                ]
+            }
+        }
+    }
+    enviar_request(data)
+
+
+def enviar_aseguradora(numero):
+    data = {
+        "messaging_product": "whatsapp",
+        "recipient_type": "individual",
+        "to": numero,
+        "type": "interactive",
+        "interactive": {
+            "type": "list",
+            "body": {
+                "text": (
+                    "🏥 Seleccione su aseguradora:\n\n"
+                    "💳 Importante:\n"
+                    "Según tu tipo de cobertura, es posible que debas "
+                    "realizar un copago al momento del servicio."
+                )
+            },
+            "action": {
+                "button": "Ver opciones",
+                "sections": [
+                    {
+                        "title": "Aseguradoras",
+                        "rows": [
+                            {
+                                "id": "seg_sura",
+                                "title": "Poliza Sura",
+                                "description": "No incluye plan complementario"
+                            },
+                            {
+                                "id": "seg_coomeva",
+                                "title": "Coomeva",
+                                "description": "Medicina prepagada"
+                            },
+                            {
+                                "id": "seg_medplus",
+                                "title": "Medplus",
+                                "description": "Seleccionar cobertura"
+                            },
+                            {
+                                "id": "seg_bolivar",
+                                "title": "Seguros Bolivar",
+                                "description": "Seleccionar cobertura"
+                            }
+                        ]
+                    }
+                ]
+            }
+        }
+    }
+    enviar_request(data)
+
+
+def enviar_tipo_examen(numero):
+    data = {
+        "messaging_product": "whatsapp",
+        "recipient_type": "individual",
+        "to": numero,
+        "type": "interactive",
+        "interactive": {
+            "type": "list",
+            "body": {
+                "text": (
+                    "🧪 Tipo de examen o muestra\n\n"
+                    "Indícanos el examen que necesitas:"
+                )
+            },
+            "action": {
+                "button": "Ver examenes",
+                "sections": [
+                    {
+                        "title": "Exámenes disponibles",
+                        "rows": [
+                            {
+                                "id": "examen_directo_hongos",
+                                "title": "Directo hongos",
+                                "description": "Fresco o KOH"
+                            },
+                            {
+                                "id": "examen_directo_cultivo",
+                                "title": "Hongos + Cultivo",
+                                "description": "Micosis superficiales"
+                            },
+                            {
+                                "id": "examen_galactomanano",
+                                "title": "Galactomanan",
+                                "description": "Aspergillus"
+                            },
+                            {
+                                "id": "examen_cryptococcus",
+                                "title": "Cryptococcus",
+                                "description": "Lateral Flow Assay"
+                            },
+                            {
+                                "id": "examen_serologia_inmuno",
+                                "title": "Serologia hongos",
+                                "description": "Inmunodifusión"
+                            },
+                            {
+                                "id": "examen_serologia_complemento",
+                                "title": "Serologia endemicos",
+                                "description": "Fijación complemento"
+                            },
+                            {
+                                "id": "examen_igra",
+                                "title": "IGRAs",
+                                "description": "QuantiFERON-TB"
+                            },
+                            {
+                                "id": "examen_ppd",
+                                "title": "Tuberculina PPD",
+                                "description": "Test Mantoux"
+                            },
+                            {
+                                "id": "examen_otro",
+                                "title": "Otro examen",
+                                "description": "Escribir manualmente"
+                            }
+                        ]
+                    }
+                ]
+            }
+        }
+    }
+    enviar_request(data)    

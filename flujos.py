@@ -1,7 +1,8 @@
 from models import db, Cita, Consentimiento, agregar_mensajes_log
 from mensajes import (enviar_texto, enviar_menu, enviar_bienvenida, enviar_tipo_documento,
                       mostrar_fechas_disponibles, enviar_tipo_cita,
-                      enviar_requisitos, enviar_fuera_horario, enviar_politica_datos
+                      enviar_requisitos, enviar_fuera_horario, enviar_politica_datos,
+                      enviar_tipo_cobertura, enviar_aseguradora, enviar_tipo_examen
                       )
 from config import LINK_ASESOR, HORARIO_INICIO, HORARIO_FIN, URL_RESULTADOS
 from datetime import datetime, timedelta
@@ -182,9 +183,54 @@ def manejar_boton(numero, opcion_id):
         sesion = sesiones.get(numero, {})
         fechas = sesion.get('fechas', {})
         fecha_elegida = fechas.get(opcion_id, opcion_id)
-        sesiones[numero]['paso'] = 'motivo'
+        sesiones[numero]['paso'] = 'cobertura'
         sesiones[numero]['fecha_cita'] = fecha_elegida
-        enviar_texto(numero, "Cual es el motivo de tu cita?")
+        enviar_tipo_cobertura(numero)
+
+    # ── TIPO DE COBERTURA ──
+    elif opcion_id == 'cobertura_particular':
+        sesiones[numero]['cobertura'] = 'Particular'
+        sesiones[numero]['paso'] = 'tipo_examen'
+        enviar_tipo_examen(numero)
+
+    elif opcion_id == 'cobertura_poliza':
+        sesiones[numero]['cobertura'] = 'Póliza'
+        sesiones[numero]['paso'] = 'aseguradora'
+        enviar_aseguradora(numero)
+
+    # ── ASEGURADORA ──
+    elif opcion_id.startswith('seg_'):
+        aseguradoras = {
+            'seg_sura':    'Póliza Sura (no incluye plan complementario)',
+            'seg_coomeva': 'Coomeva Medicina Prepagada',
+            'seg_medplus': 'Medplus',
+            'seg_bolivar': 'Seguros Bolívar',
+        }
+        sesiones[numero]['aseguradora'] = aseguradoras.get(opcion_id, opcion_id)
+        sesiones[numero]['paso'] = 'tipo_examen'
+        enviar_tipo_examen(numero)
+
+    # ── TIPO DE EXAMEN ──
+    elif opcion_id.startswith('examen_'):
+        examenes = {
+            'examen_directo_hongos':       'Examen directo para hongos (fresco o KOH)',
+            'examen_directo_cultivo':      'Examen directo para hongos (KOH) y Cultivo para hongos (micosis superficiales/subcutáneas)',
+            'examen_galactomanano':        'Antígeno galactomanan para Aspergillus (PLATELIA™)',
+            'examen_cryptococcus':         'Antígeno Capsular de Cryptococcus neoformans por LFA',
+            'examen_serologia_inmuno':     'Serología para hongos por inmunodifusión',
+            'examen_serologia_complemento':'Serología para hongos endémicos por fijación del complemento',
+            'examen_igra':                 'Ensayo de liberación de Interferón Gamma (IGRAs) / QuantiFERON-TB',
+            'examen_ppd':                  'Tuberculina (prueba cutánea) / PPD / Test Mantoux',
+        }
+        if opcion_id == 'examen_otro':
+            sesiones[numero]['paso'] = 'examen_otro_texto'
+            enviar_texto(numero,
+                "Por favor indica el nombre completo del examen tal como aparece en tu orden médica:"
+            )
+        else:
+            sesiones[numero]['tipo_examen'] = examenes.get(opcion_id, opcion_id)
+            sesiones[numero]['paso'] = 'motivo'
+            enviar_texto(numero, "¿Cuál es el motivo de tu cita?")
 
 
 def manejar_texto(numero, texto):
