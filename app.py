@@ -6,24 +6,12 @@ from config import SECRET_KEY
 from datetime import datetime
 import os
 app = Flask(__name__)
-
-if os.getenv("RENDER"):
-    # Cuando corre en Render
-    app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URL")
-else:
-    # Cuando corre en tu PC local
-    app.config["SQLALCHEMY_DATABASE_URI"] = "postgresql://postgres:cib2526@localhost:5432/metapython"
-
-app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-app.config["SECRET_KEY"] = os.getenv("SECRET_KEY", "clave_local_segura")
-
-app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
-    "pool_pre_ping": True,
-    "pool_recycle": 300,
-    "pool_timeout": 30
-}
-
-
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv(
+    "DATABASE_URL",
+    "postgresql://metapython:GrltBpWuunwQjtJaeNqnNI0QghF4lPVn@dpg-d7ltlr2pmmbs73fqjrl0-a.virginia-postgres.render.com/metapython_69tt"
+)
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['SECRET_KEY'] = SECRET_KEY
 
 db.init_app(app)
 app.register_blueprint(webhook_bp)
