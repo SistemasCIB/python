@@ -268,6 +268,7 @@ def manejar_boton(numero, opcion_id):
         if sesiones[numero]["tipo_cita"] == "presencial":
             sesiones[numero]["paso"] = "hora"
             mostrar_horas_disponibles(numero, sesiones)
+            return
         else:    
         ## Si es domicilio no pide hora
            sesiones[numero]["hora_cita"] = "Por asignar"
