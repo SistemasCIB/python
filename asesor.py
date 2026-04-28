@@ -126,7 +126,7 @@ def nueva_cita():
 
         if archivo and archivo.filename != '':
             nombre_archivo = secure_filename(archivo.filename)
-            ruta = os.path.join('uploads', nombre_archivo)
+            ruta = os.path.join('static/uploads', nombre_archivo)
             archivo.save(ruta)
 
         cita = Cita(
@@ -172,7 +172,6 @@ def editar_cita(cita_id):
         cita.documento = request.form['documento']
         cita.telefono = request.form['telefono']
         cita.tipo_cita = request.form['tipo_cita']
-        cita.orden_medica = request.form['orden_medica']
         cita.fecha_cita = request.form['fecha_cita']
         cita.estado = request.form['estado']
 
@@ -180,7 +179,7 @@ def editar_cita(cita_id):
 
         if archivo and archivo.filename != '':
             nombre_archivo = secure_filename(archivo.filename)
-            ruta = os.path.join('uploads', nombre_archivo)
+            ruta = os.path.join('static/uploads', nombre_archivo)
             archivo.save(ruta)
 
             cita.orden_medica = nombre_archivo

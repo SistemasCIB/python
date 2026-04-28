@@ -186,7 +186,7 @@ textarea{
         <h2>{{ 'Editar cita' if cita else 'Nueva cita manual' }}</h2>
         <p>Completa la información del paciente y guarda los cambios.</p>
 
-        <form method="POST">
+        <form method="POST" enctype="multipart/form-data">
 
             <div class="grid">
 
@@ -286,7 +286,12 @@ textarea{
                     <label>Orden médica</label>
                     <input type="file" name="orden_medica" accept=".pdf,image/*">
                     {% if cita and cita.orden_medica %}
-                      <p>Archivo actual: {{ cita.orden_medica }}</p>
+                       <small style="display:block; margin-top:8px; color:#666;">
+                       archivo actual:
+                        <a href="{{ url_for('static', filename='uploads/' + cita.orden_medica) }}" target="_blank">
+                            {{ cita.orden_medica }}
+                        </a>
+                       </small> 
                     {% endif %}
 
                 </div>
