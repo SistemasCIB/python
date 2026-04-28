@@ -420,7 +420,22 @@ def confirmar_cita(numero):
     sesion = sesiones.get(numero, {})
 
     try:
+        from datetime import datetime
 
+        # ----------------------------
+        # Fecha y hora reales
+        # ----------------------------
+        fecha_texto = sesion.get("fecha_cita")          # 30/04/2026
+        hora_texto = sesion.get("hora_cita") or "07:00"
+
+        fecha_real = datetime.strptime(
+            f"{fecha_texto} {hora_texto}",
+            "%d/%m/%Y %H:%M"
+        )
+
+        # ----------------------------
+        # Guardar cita
+        # ----------------------------
         cita = Cita(
             tipo_documento=sesion.get("tipo_documento", ""),
             nombre=sesion.get("nombre", ""),
@@ -430,9 +445,12 @@ def confirmar_cita(numero):
             direccion=sesion.get("direccion", ""),
             tipo_cita=sesion.get("tipo_cita", ""),
             orden_medica=sesion.get("orden", ""),
-            fecha_cita=sesion.get("fecha_cita", ""),
-            hora_cita=sesion.get("hora_cita", ""),
             orden_tipo_archivo=sesion.get("tipo_archivo", ""),
+            cobertura=sesion.get("cobertura", ""),
+            aseguradora=sesion.get("aseguradora", ""),
+            tipo_examen=sesion.get("tipo_examen", ""),
+            fecha_cita=fecha_real,
+            hora_cita=hora_texto,
             numero_whatsapp=numero,
             estado="pendiente"
         )
@@ -452,7 +470,7 @@ def confirmar_cita(numero):
 
         enviar_texto(
             numero,
-            "Ocurrió un error guardando tu solicitud."
+            "❌ Ocurrió un error guardando tu solicitud."
         )
 
     sesiones[numero] = {
