@@ -131,6 +131,7 @@ def nueva_cita():
 
         cita = Cita(
             nombre=request.form['nombre'],
+            tipo_documento=request.form['tipo_documento'],
             documento=request.form['documento'],
             telefono=request.form['telefono'],
             tipo_cita=request.form['tipo_cita'],
@@ -167,9 +168,11 @@ def editar_cita(cita_id):
 
     if request.method == 'POST':
         cita.nombre = request.form['nombre']
+        cita.tipo_documento = request.form['tipo_documento']
         cita.documento = request.form['documento']
         cita.telefono = request.form['telefono']
         cita.tipo_cita = request.form['tipo_cita']
+        cita.orden_medica = request.form['orden_medica']
         cita.fecha_cita = request.form['fecha_cita']
         cita.estado = request.form['estado']
 

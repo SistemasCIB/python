@@ -195,6 +195,18 @@ textarea{
                     <input type="text" name="nombre"
                            value="{{ cita.nombre if cita else '' }}" required>
                 </div>
+                <div>
+                    <label>Tipo de documento</label>
+                    <select name="tipo_documento" required>
+                        <option value="cc" {% if cita and cita.tipo_documento == 'cc' %}selected{% endif %}>Cédula de ciudadanía</option>
+                        <option value="ti" {% if cita and cita.tipo_documento == 'ti' %}selected{% endif %}>Tarjeta de identidad</option>
+                        <option value="pasaporte" {% if cita and cita.tipo_documento == 'pasaporte' %}selected{% endif %}>Pasaporte</option>
+                        <option value="CE" {% if cita and cita.tipo_documento == 'CE' %}selected{% endif %}>Cedula de extranjeria</option>
+                        <option value="PPT" {% if cita and cita.tipo_documento == 'PPT' %}selected{% endif %}>Permiso por protección temporal</option>
+                        <option value="RC" {% if cita and cita.tipo_documento == 'RC' %}selected{% endif %}>Registro civil</option>
+                        <option value="otro" {% if cita and cita.tipo_documento == 'otro' %}selected{% endif %}>Otro</option>
+                    </select>
+                </div>
 
                 <div>
                     <label>Documento</label>
@@ -210,7 +222,7 @@ textarea{
 
                 <div>
                     <label>Tipo de cita</label>
-                    <select name="tipo_cita">
+                    <select name="tipo_cita" required>
                         <option value="presencial"
                         {% if cita and cita.tipo_cita == 'presencial' %}selected{% endif %}>
                         Presencial
@@ -273,6 +285,10 @@ textarea{
                 <div class="full">
                     <label>Orden médica</label>
                     <input type="file" name="orden_medica" accept=".pdf,image/*">
+                    {% if cita and cita.orden_medica %}
+                      <p>Archivo actual: {{ cita.orden_medica }}</p>
+                    {% endif %}
+
                 </div>
 
             </div>
