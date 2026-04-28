@@ -431,6 +431,7 @@ def confirmar_cita(numero):
             tipo_cita=sesion.get("tipo_cita", ""),
             orden_medica=sesion.get("orden", ""),
             fecha_cita=sesion.get("fecha_cita", ""),
+            hora_cita=sesion.get("hora_cita", ""),
             orden_tipo_archivo=sesion.get("tipo_archivo", ""),
             numero_whatsapp=numero,
             estado="pendiente"
