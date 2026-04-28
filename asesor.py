@@ -69,6 +69,7 @@ def confirmar_cita(cita_id):
             f"Tu cita ha sido CONFIRMADA!\n\n"
             f"Tipo: {cita.tipo_cita.capitalize()}\n"
             f"Fecha: {cita.fecha_cita}\n"
+            f"Hora: {cita.hora_cita}\n"
             f"Orden Médica: {cita.orden_medica}\n\n"
             f"Te esperamos. Horario: {HORARIO_INICIO}am a {HORARIO_FIN}pm."
         )
@@ -103,11 +104,11 @@ def exportar_excel():
     citas = Cita.query.order_by(Cita.creada_en.desc()).all()
     output = io.StringIO()
     writer = csv.writer(output)
-    writer.writerow(['ID','Nombre','Documento','Telefono','Tipo','Orden Médica','Fecha','WhatsApp','Estado','Registrada'])
+    writer.writerow(['ID','Nombre','Documento','Telefono','Tipo','Orden Médica','Fecha','Hora','WhatsApp','Estado','Registrada'])
     for c in citas:
         writer.writerow([c.id, c.nombre, c.documento, c.telefono,
                         c.tipo_cita, c.orden_medica, c.fecha_cita,
-                        c.numero_whatsapp, c.estado,
+                        c.hora_cita, c.numero_whatsapp, c.estado,
                         c.creada_en.strftime('%d/%m/%Y %H:%M')])
     output.seek(0)
     return Response(
@@ -137,6 +138,7 @@ def nueva_cita():
             tipo_cita=request.form['tipo_cita'],
             orden_medica=nombre_archivo,
             fecha_cita=request.form['fecha_cita'],
+            hora_cita=request.form['hora_cita'],
             numero_whatsapp=request.form['telefono'],
             estado=request.form['estado']
         )
@@ -173,6 +175,7 @@ def editar_cita(cita_id):
         cita.telefono = request.form['telefono']
         cita.tipo_cita = request.form['tipo_cita']
         cita.fecha_cita = request.form['fecha_cita']
+        cita.hora_cita = request.form['hora_cita']
         cita.estado = request.form['estado']
 
         archivo = request.files.get('orden_medica')

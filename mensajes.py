@@ -152,11 +152,34 @@ def enviar_tipo_cita(numero):
         "type": "interactive",
         "interactive": {
             "type": "button",
-            "body": {"text": "¿Qué tipo de cita necesitas?"},
+            "body": {
+                "text": """¿Qué tipo de cita necesitas?
+
+🏥 *Presencial*
+🗓️ Martes a jueves: 7:30 a.m. a 3:30 p.m.
+🗓️ Viernes: 7:30 a.m. a 11:30 a.m.
+
+🏠 *Domicilio*
+🗓️ Solo miércoles: 7:30 a.m. a 1:00 p.m.
+
+Selecciona una opción 👇"""
+            },
             "action": {
                 "buttons": [
-                    {"type": "reply", "reply": {"id": "tipo_presencial", "title": "Presencial"}},  # ✅
-                    {"type": "reply", "reply": {"id": "tipo_domicilio",  "title": "Domicilio"}}    # ✅
+                    {
+                        "type": "reply",
+                        "reply": {
+                            "id": "tipo_presencial",
+                            "title": "Presencial"
+                        }
+                    },
+                    {
+                        "type": "reply",
+                        "reply": {
+                            "id": "tipo_domicilio",
+                            "title": "Domicilio"
+                        }
+                    }
                 ]
             }
         }
@@ -187,24 +210,56 @@ def enviar_requisitos(numero, tipo):
 
 def mostrar_fechas_disponibles(numero, sesiones):
     from datetime import datetime, timedelta
-    DIAS_ES = ["Lunes", "Martes", "Miercoles", "Jueves", "Viernes", "Sabado", "Domingo"]
+
+    DIAS_ES = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"]
     MESES_ES = ["", "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
                 "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"]
 
+    tipo = sesiones[numero]["tipo_cita"]
+    hoy = datetime.now()
     dias = []
-    dia = datetime.now() + timedelta(days=1)
-    while len(dias) < 3:
-        if dia.weekday() < 5:
-            dias.append(f"{DIAS_ES[dia.weekday()]} {dia.day} de {MESES_ES[dia.month]}")
-        dia += timedelta(days=1)
+
+    # 🏥 PRESENCIAL
+    if tipo == "presencial":
+
+        dia = hoy + timedelta(days=2)
+
+        while len(dias) < 3:
+            if dia.weekday() < 5:   # lunes a viernes
+                texto = f"{DIAS_ES[dia.weekday()]} {dia.day} de {MESES_ES[dia.month]}"
+                dias.append(texto)
+
+            dia += timedelta(days=1)
+
+    # 🏠 DOMICILIO
+    else:
+
+        inicio = hoy + timedelta(days=8)
+        fin = hoy + timedelta(days=15)
+
+        dia = inicio
+
+        while dia <= fin:
+            if dia.weekday() == 2:   # miércoles
+                texto = f"{DIAS_ES[dia.weekday()]} {dia.day} de {MESES_ES[dia.month]}"
+                dias.append(texto)
+
+            dia += timedelta(days=1)
 
     botones = []
+
     for i, d in enumerate(dias):
         botones.append({
             "type": "reply",
-            "reply": {"id": f"fecha_{i+1}", "title": d[:20]}  # ✅ truncado a 20
+            "reply": {
+                "id": f"fecha_{i+1}",
+                "title": d[:20]
+            }
         })
-    sesiones[numero]['fechas'] = {f"fecha_{i+1}": d for i, d in enumerate(dias)}
+
+    sesiones[numero]["fechas"] = {
+        f"fecha_{i+1}": d for i, d in enumerate(dias)
+    }
 
     data = {
         "messaging_product": "whatsapp",
@@ -214,27 +269,41 @@ def mostrar_fechas_disponibles(numero, sesiones):
         "interactive": {
             "type": "button",
             "body": {"text": "Selecciona una fecha disponible:"},
-            "action": {"buttons": botones}
+            "action": {"buttons": botones[:3]}
         }
     }
+
     enviar_request(data)
 
-def mostrar_horas_disponibles(numero):
-    horas = [
-        "07:00", "08:00", "09:00", "10:00",
-        "11:00", "12:00", "13:00", "14:00",
-        "15:00", "16:00"
-    ]
+def mostrar_horas_disponibles(numero, sesiones):
+
+    tipo = sesiones[numero]["tipo_cita"]
+
+    if tipo == "presencial":
+        horas = [
+            "07:00", "08:00", "09:00",
+            "10:00", "11:00", "12:00",
+            "13:00", "14:00", "15:00"
+        ]
+    else:
+        horas = [
+            "07:30", "08:30", "09:30"
+        ]
 
     botones = []
-    for i, h in enumerate(horas):
+
+    for i, h in enumerate(horas[:3]):
         botones.append({
             "type": "reply",
             "reply": {
                 "id": f"hora_{i+1}",
-                "title": h                              # ✅ "07:00" = 5 caracteres
+                "title": h
             }
         })
+
+    sesiones[numero]["horas"] = {
+        f"hora_{i+1}": h for i, h in enumerate(horas)
+    }
 
     data = {
         "messaging_product": "whatsapp",
@@ -244,9 +313,10 @@ def mostrar_horas_disponibles(numero):
         "interactive": {
             "type": "button",
             "body": {"text": "Selecciona una hora disponible:"},
-            "action": {"buttons": botones[:3]}
+            "action": {"buttons": botones}
         }
     }
+
     enviar_request(data)
 
 def enviar_tipo_documento(numero):

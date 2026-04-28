@@ -114,12 +114,13 @@ def manejar_boton(numero, opcion_id):
             enviar_fuera_horario(numero)
             return
 
+        # FLUJO: inicia con datos del paciente → tipo_documento
         sesiones[numero] = {
             "flujo": "agendar",
-            "paso": "tipo_cita"
+            "paso": "tipo_documento"
         }
 
-        enviar_tipo_cita(numero)
+        enviar_tipo_documento(numero)
         return
 
     elif opcion_id == "resultados":
@@ -141,61 +142,21 @@ def manejar_boton(numero, opcion_id):
         return
 
     # -----------------------------------
-    # TIPO CITA
+    # PASO 1 - DATOS PACIENTE: tipo documento
     # -----------------------------------
-    elif opcion_id == "tipo_presencial":
+    elif opcion_id.startswith("tdoc_"):
 
-        sesiones[numero] = {
-            "flujo": "agendar",
-            "paso": "requisitos",
-            "tipo_cita": "presencial"
-        }
+        sesiones[numero]["tipo_documento"] = opcion_id.replace("tdoc_", "")
+        sesiones[numero]["paso"] = "documento"
 
-        enviar_requisitos(numero, "presencial")
-        return
-
-    elif opcion_id == "tipo_domicilio":
-
-        sesiones[numero] = {
-            "flujo": "agendar",
-            "paso": "requisitos",
-            "tipo_cita": "domicilio"
-        }
-
-        enviar_requisitos(numero, "domicilio")
-        return
-
-    # -----------------------------------
-    # REQUISITOS
-    # -----------------------------------
-    elif opcion_id == "cumple_si":
-        sesiones[numero]["paso"] = "fecha"
-        mostrar_fechas_disponibles(numero, sesiones)
-        return
-
-    elif opcion_id == "cumple_no":
         enviar_texto(
             numero,
-            "Cuando cumplas requisitos podremos ayudarte."
+            "Escribe tu número de documento:"
         )
-        enviar_menu(numero)
         return
 
     # -----------------------------------
-    # FECHA
-    # -----------------------------------
-    elif opcion_id.startswith("fecha_"):
-
-        fecha = sesiones[numero]["fechas"].get(opcion_id)
-
-        sesiones[numero]["fecha_cita"] = fecha
-        sesiones[numero]["paso"] = "cobertura"
-
-        enviar_tipo_cobertura(numero)
-        return
-
-    # -----------------------------------
-    # COBERTURA
+    # PASO 2 - COBERTURA: después de dirección
     # -----------------------------------
     elif opcion_id == "cobertura_particular":
 
@@ -225,7 +186,7 @@ def manejar_boton(numero, opcion_id):
         return
 
     # -----------------------------------
-    # EXAMEN
+    # PASO 3 - TIPO EXAMEN: después de cobertura
     # -----------------------------------
     elif opcion_id.startswith("examen_"):
 
@@ -250,22 +211,67 @@ def manejar_boton(numero, opcion_id):
             return
 
         sesiones[numero]["tipo_examen"] = examenes.get(opcion_id)
-        sesiones[numero]["paso"] = "tipo_documento"
+        # FLUJO: después de examen → requisitos
+        sesiones[numero]["paso"] = "requisitos"
 
-        enviar_tipo_documento(numero)
+        enviar_requisitos(numero, "general")
         return
 
     # -----------------------------------
-    # DOCUMENTO
+    # PASO 4 - REQUISITOS: después de examen
     # -----------------------------------
-    elif opcion_id.startswith("tdoc_"):
+    elif opcion_id == "cumple_si":
+        # FLUJO: después de requisitos → tipo_cita
+        sesiones[numero]["paso"] = "tipo_cita"
 
-        sesiones[numero]["tipo_documento"] = opcion_id.replace("tdoc_", "")
-        sesiones[numero]["paso"] = "documento"
+        enviar_tipo_cita(numero)
+        return
+
+    elif opcion_id == "cumple_no":
+        enviar_texto(
+            numero,
+            "Cuando cumplas requisitos podremos ayudarte."
+        )
+        enviar_menu(numero)
+        return
+
+    # -----------------------------------
+    # PASO 5 - TIPO CITA: después de requisitos
+    # -----------------------------------
+    elif opcion_id == "tipo_presencial":
+
+        sesiones[numero]["tipo_cita"] = "presencial"
+        # FLUJO: después de tipo_cita → fecha
+        sesiones[numero]["paso"] = "fecha"
+
+        mostrar_fechas_disponibles(numero, sesiones)
+        return
+
+    elif opcion_id == "tipo_domicilio":
+
+        sesiones[numero]["tipo_cita"] = "domicilio"
+        # FLUJO: después de tipo_cita → fecha
+        sesiones[numero]["paso"] = "fecha"
+
+        mostrar_fechas_disponibles(numero, sesiones)
+        return
+
+    # -----------------------------------
+    # PASO 6 - FECHA: después de tipo_cita
+    # -----------------------------------
+    elif opcion_id.startswith("fecha_"):
+
+        fecha = sesiones[numero]["fechas"].get(opcion_id)
+
+        sesiones[numero]["fecha_cita"] = fecha
+        # FLUJO: después de fecha → orden médica → confirmar
+        sesiones[numero]["paso"] = "orden"
 
         enviar_texto(
             numero,
-            "Escribe tu número de documento:"
+            "📄 Ahora adjunta la orden médica.\n\n"
+            "Puedes enviarla en PDF o foto.\n"
+            "Un asesor la revisará para confirmar tu cita."
         )
         return
 
@@ -291,13 +297,14 @@ def manejar_texto(numero, texto):
     # -----------------------------------
     if paso == "examen_otro_texto":
         sesiones[numero]["tipo_examen"] = texto
-        sesiones[numero]["paso"] = "tipo_documento"
+        # FLUJO: después de examen otro → requisitos
+        sesiones[numero]["paso"] = "requisitos"
 
-        enviar_tipo_documento(numero)
+        enviar_requisitos(numero, "general")
         return
 
     # -----------------------------------
-    # DOCUMENTO
+    # DATOS PACIENTE: número de documento
     # -----------------------------------
     elif paso == "documento":
         sesiones[numero]["documento"] = texto
@@ -310,7 +317,7 @@ def manejar_texto(numero, texto):
         return
 
     # -----------------------------------
-    # NOMBRE
+    # DATOS PACIENTE: nombre
     # -----------------------------------
     elif paso == "nombre":
         sesiones[numero]["nombre"] = texto
@@ -323,7 +330,7 @@ def manejar_texto(numero, texto):
         return
 
     # -----------------------------------
-    # TELEFONO
+    # DATOS PACIENTE: teléfono
     # -----------------------------------
     elif paso == "telefono":
         sesiones[numero]["telefono"] = texto
@@ -336,7 +343,7 @@ def manejar_texto(numero, texto):
         return
 
     # -----------------------------------
-    # CORREO
+    # DATOS PACIENTE: correo
     # -----------------------------------
     elif paso == "correo":
         sesiones[numero]["correo"] = texto
@@ -349,22 +356,18 @@ def manejar_texto(numero, texto):
         return
 
     # -----------------------------------
-    # DIRECCION
+    # DATOS PACIENTE: dirección
+    # FLUJO: después de dirección → cobertura
     # -----------------------------------
     elif paso == "direccion":
         sesiones[numero]["direccion"] = texto
-        sesiones[numero]["paso"] = "orden"
+        sesiones[numero]["paso"] = "cobertura"
 
-        enviar_texto(
-            numero,
-            "📄 Ahora adjunta la orden médica.\n\n"
-            "Puedes enviarla en PDF o foto.\n"
-            "Un asesor la revisará para confirmar tu cita."
-        )
+        enviar_tipo_cobertura(numero)
         return
 
     # -----------------------------------
-    # ORDEN
+    # ORDEN (captura por texto — error)
     # -----------------------------------
     elif paso == "orden":
         enviar_texto(
@@ -372,13 +375,15 @@ def manejar_texto(numero, texto):
             "Por favor envía la orden como foto 📷 o archivo PDF 📄, no como texto."
         )
         return
+
+
 def manejar_archivo(numero, media_id, tipo_mime):
     if numero not in sesiones:
         return
     if sesiones[numero].get("paso") != "orden":
         return
 
-    sesiones[numero]["orden"]        = media_id   # ← clave consistente
+    sesiones[numero]["orden"] = media_id
     sesiones[numero]["tipo_archivo"] = tipo_mime
     confirmar_cita(numero)
 
@@ -401,9 +406,9 @@ def confirmar_cita(numero):
             correo=sesion.get("correo", ""),
             direccion=sesion.get("direccion", ""),
             tipo_cita=sesion.get("tipo_cita", ""),
-            orden_medica=sesion.get("orden",""),
+            orden_medica=sesion.get("orden", ""),
             fecha_cita=sesion.get("fecha_cita", ""),
-            orden_tipo_archivo = sesion.get("tipo_archivo", ""),
+            orden_tipo_archivo=sesion.get("tipo_archivo", ""),
             numero_whatsapp=numero,
             estado="pendiente"
         )
