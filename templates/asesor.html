@@ -66,7 +66,8 @@ header span{
     color:white;
 }
 
-.btn-historial{background:#8e44ad;
+.btn-historial{
+    background:#8e44ad;
     color:white;
 }
 
@@ -300,7 +301,6 @@ tr:hover td{
 
     </div>
 
-
     <!-- TABLE -->
 
     <div class="table-box">
@@ -354,48 +354,56 @@ tr:hover td{
                     </td>
 
                     <td>
-                       {% if c.orden_medica %}
-                         <a href="/asesor/orden/{{ c.id }}" target="_blank" class="btn btn-edit">
+                        {% if c.orden_medica %}
+                        <a href="/asesor/orden/{{ c.id }}" target="_blank" class="btn btn-edit">
                             Ver orden
-                         </a>
+                        </a>
                         {% else %}
-                         <span style="color:#aaa">Sin orden</span>
-                       {% endif %}
+                        <span style="color:#aaa">Sin orden</span>
+                        {% endif %}
                     </td>
 
-                    <td>{{ c.fecha_cita.strftime('%d/%m/%Y') if c.fecha_cita else '' }}</td>
-                    <td>{{ c.hora_cita.strftime('%H:%M') if c.hora_cita else '' }}</td>
+                    <!-- FECHA -->
+                    <td>
+                        {{ c.fecha_cita.strftime('%d/%m/%Y') if c.fecha_cita else '' }}
+                    </td>
+
+                    <!-- HORA -->
+                    <td>
+                        {{ c.hora_cita or 'Por asignar' }}
+                    </td>
+
+                    <!-- ESTADO -->
                     <td>
                         <span class="pill {{ c.estado }}">
                             {{ c.estado.capitalize() }}
                         </span>
                     </td>
 
+                    <!-- REGISTRADA -->
                     <td>
-                        {{ c.creada_en.strftime('%d/%m/%Y %H:%M') }}
+                        {{ c.creada_en.strftime('%d/%m/%Y %H:%M') if c.creada_en else '' }}
                     </td>
 
+                    <!-- ACCIONES -->
                     <td>
 
                         <div class="actions">
 
                             {% if c.estado == 'pendiente' %}
 
-                            <a href="/asesor/confirmar/{{ c.id }}"
-                               class="btn btn-confirm">
-                               Confirmar
+                            <a href="/asesor/confirmar/{{ c.id }}" class="btn btn-confirm">
+                                Confirmar
                             </a>
 
-                            <a href="/asesor/rechazar/{{ c.id }}"
-                               class="btn btn-reject">
-                               Rechazar
+                            <a href="/asesor/rechazar/{{ c.id }}" class="btn btn-reject">
+                                Rechazar
                             </a>
 
                             {% endif %}
 
-                            <a href="/asesor/editar/{{ c.id }}"
-                               class="btn btn-edit">
-                               Editar
+                            <a href="/asesor/editar/{{ c.id }}" class="btn btn-edit">
+                                Editar
                             </a>
 
                         </div>

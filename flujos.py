@@ -411,6 +411,7 @@ def manejar_archivo(numero, media_id, tipo_mime):
     confirmar_cita(numero)
 
 
+
 # =====================================================
 # GUARDAR CITA
 # =====================================================
@@ -422,20 +423,30 @@ def confirmar_cita(numero):
     try:
         from datetime import datetime
 
-        # ----------------------------
-        # Fecha y hora reales
-        # ----------------------------
-        fecha_texto = sesion.get("fecha_cita")          # 30/04/2026
-        hora_texto = sesion.get("hora_cita") or "07:00"
+        # ---------------------------------
+        # FECHA seleccionada desde botones
+        # viene como texto: 30/04/2026
+        # ---------------------------------
+        fecha_texto = sesion.get("fecha_cita", "").strip()
 
-        fecha_real = datetime.strptime(
-            f"{fecha_texto} {hora_texto}",
-            "%d/%m/%Y %H:%M"
-        )
+        # ---------------------------------
+        # HORA
+        # presencial = seleccionada
+        # domicilio = por asignar
+        # ---------------------------------
+        hora_texto = sesion.get("hora_cita", "").strip()
 
-        # ----------------------------
-        # Guardar cita
-        # ----------------------------
+        if hora_texto and hora_texto != "Por asignar":
+            fecha_real = datetime.strptime(
+                f"{fecha_texto} {hora_texto}",
+                "%d/%m/%Y %H:%M"
+            )
+        else:
+            fecha_real = datetime.strptime(
+                fecha_texto,
+                "%d/%m/%Y"
+            )
+
         cita = Cita(
             tipo_documento=sesion.get("tipo_documento", ""),
             nombre=sesion.get("nombre", ""),
@@ -450,7 +461,7 @@ def confirmar_cita(numero):
             aseguradora=sesion.get("aseguradora", ""),
             tipo_examen=sesion.get("tipo_examen", ""),
             fecha_cita=fecha_real,
-            hora_cita=hora_texto,
+            hora_cita=hora_texto if hora_texto else "Por asignar",
             numero_whatsapp=numero,
             estado="pendiente"
         )
