@@ -374,6 +374,11 @@ tr:hover td{
                     <td>
                         {{ c.creada_en.strftime('%d/%m/%Y %H:%M') }}
                     </td>
+        
+                    <td>
+                        {{ c.fecha_cita.strftime('%d/%m/%Y') if c.fecha_cita else '' }}
+                    </td>
+
 
                     <td>
 

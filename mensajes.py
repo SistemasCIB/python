@@ -84,14 +84,14 @@ def enviar_bienvenida(numero):
                         "type": "reply",
                         "reply": {
                             "id": "soy_paciente",
-                            "title": "Soy Paciente"       # ✅ máx 20 caracteres
+                            "title": "Soy Paciente"      
                         }
                     },
                     {
                         "type": "reply",
                         "reply": {
                             "id": "soy_cliente",
-                            "title": "Soy Cliente"        # ✅ máx 20 caracteres
+                            "title": "Soy Cliente"       
                         }
                     }
                 ]
@@ -128,14 +128,14 @@ def enviar_politica_datos(numero):
                         "type": "reply",
                         "reply": {
                             "id": "acepto_datos",
-                            "title": "Si acepto"          # ✅ máx 20 caracteres
+                            "title": "Si acepto"        
                         }
                     },
                     {
                         "type": "reply",
                         "reply": {
                             "id": "no_acepto_datos",
-                            "title": "No acepto"          # ✅ máx 20 caracteres
+                            "title": "No acepto"          
                         }
                     }
                 ]
@@ -217,7 +217,9 @@ def mostrar_fechas_disponibles(numero, sesiones):
 
     tipo = sesiones[numero]["tipo_cita"]
     hoy = datetime.now()
+
     dias = []
+    fechas_guardar = {}
 
     # 🏥 PRESENCIAL
     if tipo == "presencial":
@@ -225,9 +227,13 @@ def mostrar_fechas_disponibles(numero, sesiones):
         dia = hoy + timedelta(days=2)
 
         while len(dias) < 3:
-            if dia.weekday() < 5:   # lunes a viernes
+            if dia.weekday() < 5:
+
                 texto = f"{DIAS_ES[dia.weekday()]} {dia.day} de {MESES_ES[dia.month]}"
+                real = dia.strftime("%Y-%m-%d")
+
                 dias.append(texto)
+                fechas_guardar[f"fecha_{len(dias)}"] = real
 
             dia += timedelta(days=1)
 
@@ -240,26 +246,32 @@ def mostrar_fechas_disponibles(numero, sesiones):
         dia = inicio
 
         while dia <= fin:
-            if dia.weekday() == 2:   # miércoles
+            if dia.weekday() == 2:
+
                 texto = f"{DIAS_ES[dia.weekday()]} {dia.day} de {MESES_ES[dia.month]}"
+                real = dia.strftime("%Y-%m-%d")
+
                 dias.append(texto)
+                fechas_guardar[f"fecha_{len(dias)}"] = real
 
             dia += timedelta(days=1)
 
     botones = []
 
-    for i, d in enumerate(dias):
+    for i, texto in enumerate(dias):
         botones.append({
             "type": "reply",
             "reply": {
                 "id": f"fecha_{i+1}",
-                "title": d[:20]
+                "title": texto[:20]
             }
         })
 
-    sesiones[numero]["fechas"] = {
-        f"fecha_{i+1}": d for i, d in enumerate(dias)
+    sesiones[numero]["fechas_texto"] = {
+        f"fecha_{i+1}": dias[i] for i in range(len(dias))
     }
+
+    sesiones[numero]["fechas"] = fechas_guardar
 
     data = {
         "messaging_product": "whatsapp",

@@ -11,7 +11,8 @@ from mensajes import (
     enviar_politica_datos,
     enviar_tipo_cobertura,
     enviar_aseguradora,
-    enviar_tipo_examen
+    enviar_tipo_examen,
+    mostrar_horas_disponibles
 )
 
 from config import LINK_ASESOR, HORARIO_INICIO, HORARIO_FIN, URL_RESULTADOS
@@ -264,8 +265,13 @@ def manejar_boton(numero, opcion_id):
         fecha = sesiones[numero]["fechas"].get(opcion_id)
 
         sesiones[numero]["fecha_cita"] = fecha
-        # FLUJO: después de fecha → orden médica → confirmar
-        sesiones[numero]["paso"] = "orden"
+        if sesiones[numero]["tipo_cita"] == "presencial":
+            sesiones[numero]["paso"] = "hora"
+            mostrar_horas_disponibles(numero, sesiones)
+        else:    
+        ## Si es domicilio no pide hora
+           sesiones[numero]["hora_cita"] = "Por asignar"
+           sesiones[numero]["paso"] = "orden"
 
         enviar_texto(
             numero,
