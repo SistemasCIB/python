@@ -268,6 +268,7 @@ def manejar_boton(numero, opcion_id):
         if sesiones[numero]["tipo_cita"] == "presencial":
             sesiones[numero]["paso"] = "hora"
             mostrar_horas_disponibles(numero, sesiones)
+           
             return
         else:    
         ## Si es domicilio no pide hora
@@ -281,7 +282,23 @@ def manejar_boton(numero, opcion_id):
             "Un asesor la revisará para confirmar tu cita."
         )
         return
+    # -----------------------------------
+    # PASO 7 - HORA
+    # -----------------------------------
+    elif opcion_id.startswith("hora_"):
 
+        hora = sesiones[numero]["horas"].get(opcion_id)
+
+        sesiones[numero]["hora_cita"] = hora
+        sesiones[numero]["paso"] = "orden"
+
+        enviar_texto(
+            numero,
+            "📄 Ahora adjunta la orden médica.\n\n"
+            "Puedes enviarla en PDF o foto.\n"
+            "Un asesor la revisará para confirmar tu cita."
+        )
+        return
 
 # =====================================================
 # MENSAJES TEXTO
