@@ -227,7 +227,6 @@ def manejar_boton(numero, opcion_id):
 
         enviar_tipo_cita(numero)
         return
-
     elif opcion_id == "cumple_no":
         enviar_texto(
             numero,
