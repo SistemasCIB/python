@@ -1,7 +1,7 @@
 import http.client
 import json
 from config import TOKEN_META, PHONE_NUMBER_ID, LINK_ASESOR, HORARIO_INICIO, HORARIO_FIN, REQUISITOS
-from models import agregar_mensajes_log
+from models import agregar_mensajes_log, db, Cita
 
 def enviar_request(data):
     headers = {
@@ -210,6 +210,12 @@ def enviar_requisitos(numero, tipo):
 
 def mostrar_fechas_disponibles(numero, sesiones):
     from datetime import datetime, timedelta
+    from models import Cita
+
+    DIAS_ES = [
+        "Lunes", "Martes", "Miércoles",
+        "Jueves", "Viernes", "Sábado", "Domingo"
+    ]
 
     tipo = sesiones[numero]["tipo_cita"]
     hoy = datetime.now()
@@ -217,47 +223,85 @@ def mostrar_fechas_disponibles(numero, sesiones):
     dias = []
     fechas_guardar = {}
 
+    # =====================================================
     # 🏥 PRESENCIAL
+    # Máximo 9 citas por día
+    # Desde 2 días en adelante
+    # =====================================================
     if tipo == "presencial":
 
         dia = hoy + timedelta(days=2)
 
         while len(dias) < 3:
+
             if dia.weekday() < 5:   # lunes a viernes
 
-                texto = dia.strftime("%d/%m/%Y")
+                ocupadas = Cita.query.filter(
+                    db.func.date(Cita.fecha_cita) == dia.date(),
+                    Cita.estado.in_(["pendiente", "confirmada"]),
+                    Cita.tipo_cita == "presencial"
+                ).count()
 
-                dias.append(texto)
-                fechas_guardar[f"fecha_{len(dias)}"] = texto
+                # Si aún hay cupos
+                if ocupadas < 9:
+
+                    texto = (
+                        f"{DIAS_ES[dia.weekday()]} "
+                        f"{dia.strftime('%d/%m/%Y')}"
+                    )
+
+                    dias.append(texto)
+                    fechas_guardar[f"fecha_{len(dias)}"] = dia.strftime("%d/%m/%Y")
 
             dia += timedelta(days=1)
 
+    # =====================================================
     # 🏠 DOMICILIO
+    # Solo miércoles
+    # Máximo 6 por día
+    # Desde 8 días en adelante
+    # =====================================================
     else:
 
         inicio = hoy + timedelta(days=8)
-        fin = hoy + timedelta(days=15)
+        fin = hoy + timedelta(days=30)
 
         dia = inicio
 
-        while dia <= fin:
+        while dia <= fin and len(dias) < 3:
+
             if dia.weekday() == 2:   # miércoles
 
-                texto = dia.strftime("%d/%m/%Y")
+                ocupadas = Cita.query.filter(
+                    db.func.date(Cita.fecha_cita) == dia.date(),
+                    Cita.estado.in_(["pendiente", "confirmada"]),
+                    Cita.tipo_cita == "domicilio"
+                ).count()
 
-                dias.append(texto)
-                fechas_guardar[f"fecha_{len(dias)}"] = texto
+                if ocupadas < 6:
+
+                    texto = (
+                        f"{DIAS_ES[dia.weekday()]} "
+                        f"{dia.strftime('%d/%m/%Y')}"
+                    )
+
+                    dias.append(texto)
+                    fechas_guardar[f"fecha_{len(dias)}"] = dia.strftime("%d/%m/%Y")
 
             dia += timedelta(days=1)
 
+    # =====================================================
+    # BOTONES WHATSAPP
+    # =====================================================
     botones = []
 
     for i, texto in enumerate(dias):
+
         botones.append({
             "type": "reply",
             "reply": {
                 "id": f"fecha_{i+1}",
-                "title": texto
+                "title": texto[:20]
             }
         })
 
@@ -270,42 +314,79 @@ def mostrar_fechas_disponibles(numero, sesiones):
         "type": "interactive",
         "interactive": {
             "type": "button",
-            "body": {"text": "Selecciona una fecha disponible:"},
-            "action": {"buttons": botones[:3]}
+            "body": {
+                "text": "Selecciona una fecha disponible:"
+            },
+            "action": {
+                "buttons": botones[:3]
+            }
         }
     }
 
     enviar_request(data)
 
 def mostrar_horas_disponibles(numero, sesiones):
+    from models import Cita
 
-    tipo = sesiones[numero]["tipo_cita"]
+    fecha = sesiones[numero]["fecha_cita"]
 
-    if tipo == "presencial":
-        horas = [
-            "07:00", "08:00", "09:00",
-            "10:00", "11:00", "12:00",
-            "13:00", "14:00", "15:00"
-        ]
-    else:
-        horas = [
-            "07:30", "08:30", "09:30"
-        ]
+    # -----------------------------------
+    # Horarios cada 30 min
+    # 7:30 AM hasta 11:30 AM
+    # -----------------------------------
+    horas = [
+        "07:30",
+        "08:00",
+        "08:30",
+        "09:00",
+        "09:30",
+        "10:00",
+        "10:30",
+        "11:00",
+        "11:30"
+    ]
+
+    # -----------------------------------
+    # Horas ocupadas (pendiente o confirmada)
+    # -----------------------------------
+    ocupadas = db.session.query(Cita.hora_cita).filter(
+        Cita.fecha_cita == fecha,
+        Cita.tipo_cita == "presencial",
+        Cita.estado.in_(["pendiente", "confirmada"])
+    ).all()
+
+    ocupadas = [h[0] for h in ocupadas]
+
+    # -----------------------------------
+    # Solo libres
+    # -----------------------------------
+    libres = [h for h in horas if h not in ocupadas]
+
+    if not libres:
+        enviar_texto(
+            numero,
+            "❌ Ya no hay horarios disponibles para esa fecha.\nSelecciona otra fecha."
+        )
+        mostrar_fechas_disponibles(numero, sesiones)
+        return
+
+    # -----------------------------------
+    # Guardar opciones
+    # -----------------------------------
+    sesiones[numero]["horas"] = {
+        f"hora_{i+1}": hora for i, hora in enumerate(libres)
+    }
 
     botones = []
 
-    for i, h in enumerate(horas[:3]):
+    for i, hora in enumerate(libres[:3]):   # WhatsApp solo 3 botones
         botones.append({
             "type": "reply",
             "reply": {
                 "id": f"hora_{i+1}",
-                "title": h
+                "title": hora
             }
         })
-
-    sesiones[numero]["horas"] = {
-        f"hora_{i+1}": h for i, h in enumerate(horas)
-    }
 
     data = {
         "messaging_product": "whatsapp",
@@ -314,8 +395,12 @@ def mostrar_horas_disponibles(numero, sesiones):
         "type": "interactive",
         "interactive": {
             "type": "button",
-            "body": {"text": "Selecciona una hora disponible:"},
-            "action": {"buttons": botones}
+            "body": {
+                "text": "🕐 Selecciona una hora disponible:"
+            },
+            "action": {
+                "buttons": botones
+            }
         }
     }
 
