@@ -23,7 +23,7 @@ class Cita(db.Model):
     cobertura = db.Column(db.String(50))            # NUEVO  Particular / Poliza
     aseguradora = db.Column(db.String(100))         # NUEVO  Sura / Coomeva / etc
     tipo_examen = db.Column(db.String(300))         #nombre del examen
-    fecha_cita = db.Column(db.String(50))
+    fecha_cita = db.Column(db.DateTime)
     hora_cita = db.Column(db.String(20))
     numero_whatsapp = db.Column(db.String(20))
     estado = db.Column(db.String(20), default='pendiente')  # pendiente / confirmada / rechazada / cancelada

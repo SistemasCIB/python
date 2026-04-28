@@ -211,10 +211,6 @@ def enviar_requisitos(numero, tipo):
 def mostrar_fechas_disponibles(numero, sesiones):
     from datetime import datetime, timedelta
 
-    DIAS_ES = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"]
-    MESES_ES = ["", "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
-                "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"]
-
     tipo = sesiones[numero]["tipo_cita"]
     hoy = datetime.now()
 
@@ -227,13 +223,12 @@ def mostrar_fechas_disponibles(numero, sesiones):
         dia = hoy + timedelta(days=2)
 
         while len(dias) < 3:
-            if dia.weekday() < 5:
+            if dia.weekday() < 5:   # lunes a viernes
 
-                texto = f"{DIAS_ES[dia.weekday()]} {dia.day} de {MESES_ES[dia.month]}"
-                real = dia.strftime("%Y-%m-%d")
+                texto = dia.strftime("%d/%m/%Y")
 
                 dias.append(texto)
-                fechas_guardar[f"fecha_{len(dias)}"] = real
+                fechas_guardar[f"fecha_{len(dias)}"] = texto
 
             dia += timedelta(days=1)
 
@@ -246,13 +241,12 @@ def mostrar_fechas_disponibles(numero, sesiones):
         dia = inicio
 
         while dia <= fin:
-            if dia.weekday() == 2:
+            if dia.weekday() == 2:   # miércoles
 
-                texto = f"{DIAS_ES[dia.weekday()]} {dia.day} de {MESES_ES[dia.month]}"
-                real = dia.strftime("%Y-%m-%d")
+                texto = dia.strftime("%d/%m/%Y")
 
                 dias.append(texto)
-                fechas_guardar[f"fecha_{len(dias)}"] = real
+                fechas_guardar[f"fecha_{len(dias)}"] = texto
 
             dia += timedelta(days=1)
 
@@ -263,13 +257,9 @@ def mostrar_fechas_disponibles(numero, sesiones):
             "type": "reply",
             "reply": {
                 "id": f"fecha_{i+1}",
-                "title": texto[:20]
+                "title": texto
             }
         })
-
-    sesiones[numero]["fechas_texto"] = {
-        f"fecha_{i+1}": dias[i] for i in range(len(dias))
-    }
 
     sesiones[numero]["fechas"] = fechas_guardar
 
