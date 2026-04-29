@@ -241,6 +241,7 @@ def mostrar_fechas_disponibles(numero, sesiones):
                     Cita.estado.in_(["pendiente", "confirmada"]),
                     Cita.tipo_cita == "presencial"
                 ).count()
+                agregar_mensajes_log(f"[DEBUG] {dia.date()} → ocupadas={ocupadas}")
 
                 # Si aún hay cupos
                 if ocupadas < 9:
@@ -349,8 +350,11 @@ def mostrar_horas_disponibles(numero, sesiones):
     # -----------------------------------
     # Horas ocupadas (pendiente o confirmada)
     # -----------------------------------
+    from datetime import datetime
+    fecha_dt = datetime.strptime(fecha, "%d/%m/%Y")  
+
     ocupadas = db.session.query(Cita.hora_cita).filter(
-        Cita.fecha_cita == fecha,
+        Cita.func.date(Cita.fecha_cita) == fecha_dt.date(),
         Cita.tipo_cita == "presencial",
         Cita.estado.in_(["pendiente", "confirmada"])
     ).all()
