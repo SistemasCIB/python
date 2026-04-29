@@ -423,6 +423,19 @@ td:first-child {
                             {{ c.tipo_cita.capitalize() }}
                         </span>
                     </td>
+                    <td>
+                       <span class="pill {{ c.tipo_cita }}">
+                          {{ c.tipo_cita.capitalize() }}
+                       </span>
+
+                       {% if c.tipo_cita == 'domicilio' and c.direccion_domicilio %}
+                         <br>
+                         <small style="color:#6b7280;">
+                           {{ c.direccion_domicilio }}
+                         </small>
+                       {% endif %}
+                   </td>
+                    
 
                     <td>
                         {% if c.orden_medica %}

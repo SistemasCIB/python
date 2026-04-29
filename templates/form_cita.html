@@ -234,6 +234,13 @@ textarea{
                         </option>
                     </select>
                 </div>
+                <!-- NUEVO BLOQUE DIRECCIÓN -->
+                <div id="bloque_domicilio" class="full">
+                  <label>Dirección domicilio</label>
+                  <input type="text"
+                      name="direccion_domicilio"
+                      value="{{cita.direccion_domicilio if cita else ''}}"
+                        
 
                 <div>
                     <label>Fecha solicitada</label>
@@ -273,7 +280,7 @@ textarea{
                         <option value="Coomeva" {% if cita and cita.aseguradora == 'Coomeva' %}selected{% endif %}>Coomeva</option>
                         <option value="Medplus" {% if cita and cita.aseguradora == 'Medplus' %}selected{% endif %}>Medplus</option>
                         <option value="Seguros Bolivar" {% if cita and cita.aseguradora == 'Seguros Bolivar' %}selected{% endif %}>Seguros Bolivar</option>
-
+                  </select>  
                 </div>
                 <div class="full">
                   <label>Tipo de examen</label>
