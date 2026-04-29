@@ -17,7 +17,8 @@ class Cita(db.Model):
     correo = db.Column(db.String(100))
     direccion = db.Column(db.String(200))
     telefono = db.Column(db.String(20))
-    tipo_cita = db.Column(db.String(20))        # presencial / domicilio
+    tipo_cita = db.Column(db.String(20)) # presencial o domicilio       
+    direccion_domicilio = db.Column(db.String(300))  # NUEVO para domicilio
     orden_medica = db.Column(db.String(500))
     orden_tipo_archivo = db.Column(db.String(50))   # NUEVO  ej: image/jpeg, application/pdf
     cobertura = db.Column(db.String(50))            # NUEVO  Particular / Poliza

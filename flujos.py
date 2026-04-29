@@ -272,13 +272,17 @@ def manejar_boton(numero, opcion_id):
         else:    
         ## Si es domicilio no pide hora
            sesiones[numero]["hora_cita"] = "Por asignar"
-           sesiones[numero]["paso"] = "orden"
+           sesiones[numero]["paso"] = "direccion_domicilio"
 
         enviar_texto(
             numero,
-            "📄 Ahora adjunta la orden médica.\n\n"
-            "Puedes enviarla en PDF o foto.\n"
-            "Un asesor la revisará para confirmar tu cita."
+            "🏠 *Dirección para domicilio*\n\n"
+            "Por favor envíanos la dirección completa para la toma de la muestra:\n\n"
+            "• Dirección exacta\n"
+            "• Barrio\n"
+            "• Municipio\n"
+            "• Punto de referencia (ej: cerca a…, edificio, apartamento, casa, local…)\n"
+            "• Número de teléfono de contacto"
         )
         return
     # -----------------------------------
@@ -388,6 +392,23 @@ def manejar_texto(numero, texto):
 
         enviar_tipo_cobertura(numero)
         return
+    
+    # -----------------------------------
+    #DIRECION DOMICILIO
+    # -----------------------------------
+    elif paso == "direccion_domicilio":
+        sesiones[numero]["direccion_domicilio"] = texto
+        sesiones[numero]["paso"] = "orden"
+        enviar_texto(
+            numero,
+            "📄 Ahora adjunta la orden médica.\n\n"
+            "Puedes enviarla en PDF o foto.\n"
+            "Un asesor la revisará para confirmar tu cita."
+        )
+        return
+
+
+
 
     # -----------------------------------
     # ORDEN (captura por texto — error)
@@ -455,6 +476,7 @@ def confirmar_cita(numero):
             correo=sesion.get("correo", ""),
             direccion=sesion.get("direccion", ""),
             tipo_cita=sesion.get("tipo_cita", ""),
+            direccion_domicilio=sesion.get("direccion_domicilio", ""),
             orden_medica=sesion.get("orden", ""),
             orden_tipo_archivo=sesion.get("tipo_archivo", ""),
             cobertura=sesion.get("cobertura", ""),
