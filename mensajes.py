@@ -423,7 +423,7 @@ def mostrar_horas_disponibles(numero, sesiones):
                 "text": "🕐 Selecciona una hora disponible:"
             },
             "action": {
-                "buttons": "Ver horas",
+                "button": "Ver horas",
                 "sections": [{
                     "title": "Horas disponibles",
                     "rows": rows
