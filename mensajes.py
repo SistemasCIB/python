@@ -354,7 +354,7 @@ def mostrar_horas_disponibles(numero, sesiones):
     fecha_dt = datetime.strptime(fecha, "%d/%m/%Y")  
 
     ocupadas = db.session.query(Cita.hora_cita).filter(
-        Cita.func.date(Cita.fecha_cita) == fecha_dt.date(),
+        db.func.date(Cita.fecha_cita) == fecha_dt.date(),
         Cita.tipo_cita == "presencial",
         Cita.estado.in_(["pendiente", "confirmada"])
     ).all()
