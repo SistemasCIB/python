@@ -225,7 +225,8 @@ def mostrar_fechas_disponibles(numero, sesiones):
 
     # =====================================================
     # 🏥 PRESENCIAL
-    # Máximo 9 citas por día
+    # Máximo 17 citas de lunes a viernes
+    # maximo 9 citas los viernes 
     # Desde 2 días en adelante
     # =====================================================
     if tipo == "presencial":
@@ -235,7 +236,9 @@ def mostrar_fechas_disponibles(numero, sesiones):
         while len(dias) < 3:
 
             if dia.weekday() < 5:   # lunes a viernes
-
+                es_viernes = (dia.weekday() == 4)
+                cupo_maximo = 9 if es_viernes else 17
+                
                 ocupadas = Cita.query.filter(
                     db.func.date(Cita.fecha_cita) == dia.date(),
                     Cita.estado.in_(["pendiente", "confirmada"]),
@@ -244,7 +247,7 @@ def mostrar_fechas_disponibles(numero, sesiones):
                 agregar_mensajes_log(f"[DEBUG] {dia.date()} → ocupadas={ocupadas}")
 
                 # Si aún hay cupos
-                if ocupadas < 9:
+                if ocupadas < cupo_maximo:
 
                     texto = (
                         f"{DIAS_ES[dia.weekday()]} "
@@ -328,30 +331,49 @@ def mostrar_fechas_disponibles(numero, sesiones):
 
 def mostrar_horas_disponibles(numero, sesiones):
     from models import Cita
+    from datetime import datetime
 
     fecha = sesiones[numero]["fecha_cita"]
+    fecha_dt = datetime.strptime(fecha, "%d/%m/%Y")
 
-    # -----------------------------------
-    # Horarios cada 30 min
-    # 7:30 AM hasta 11:30 AM
-    # -----------------------------------
-    horas = [
-        "07:30",
-        "08:00",
-        "08:30",
-        "09:00",
-        "09:30",
-        "10:00",
-        "10:30",
-        "11:00",
-        "11:30"
-    ]
+    es_viernes = (fecha_dt.weekday() == 4)
+    # horas los viernes
+    if es_viernes:
+        horas = [
+            "07:30",
+            "08:00",
+            "08:30",
+            "09:00",
+            "09:30",
+            "10:00",
+            "10:30",
+            "11:00",
+            "11:30"
+        ]
+    else:
+        horas = [
+            "07:30",
+            "08:00",
+            "08:30",
+            "09:00",
+            "09:30",
+            "10:00",
+            "10:30",
+            "11:00",
+            "11:30",
+            "12:00",
+            "12:30",
+            "13:00",
+            "13:30",
+            "14:00",            
+            "14:30",
+            "15:00",    
+            "15:30"   
+        ]
 
     # -----------------------------------
     # Horas ocupadas (pendiente o confirmada)
     # -----------------------------------
-    from datetime import datetime
-    fecha_dt = datetime.strptime(fecha, "%d/%m/%Y")  
 
     ocupadas = db.session.query(Cita.hora_cita).filter(
         db.func.date(Cita.fecha_cita) == fecha_dt.date(),
@@ -381,15 +403,13 @@ def mostrar_horas_disponibles(numero, sesiones):
         f"hora_{i+1}": hora for i, hora in enumerate(libres)
     }
 
-    botones = []
+    rows = []
 
-    for i, hora in enumerate(libres[:3]):   # WhatsApp solo 3 botones
-        botones.append({
-            "type": "reply",
-            "reply": {
+    for i, hora in enumerate(libres):   
+        rows.append({ 
                 "id": f"hora_{i+1}",
                 "title": hora
-            }
+            
         })
 
     data = {
@@ -398,12 +418,16 @@ def mostrar_horas_disponibles(numero, sesiones):
         "to": numero,
         "type": "interactive",
         "interactive": {
-            "type": "button",
+            "type": "list",
             "body": {
                 "text": "🕐 Selecciona una hora disponible:"
             },
             "action": {
-                "buttons": botones
+                "buttons": "Ver horas",
+                "sections": [{
+                    "title": "Horas disponibles",
+                    "rows": rows
+                }]
             }
         }
     }
