@@ -392,6 +392,7 @@ td:first-child {
                     <th>Documento</th>
                     <th>Teléfono</th>
                     <th>Tipo cita</th>
+                    <th>Dirección domicilio</th>
                     <th>Orden</th>
                     <th>Fecha</th>
                     <th>Hora</th>
@@ -418,25 +419,23 @@ td:first-child {
                     <td>{{ c.documento }}</td>
                     <td>{{ c.telefono }}</td>
 
+                    <!-- TIPO CITA -->
                     <td>
                         <span class="pill {{ c.tipo_cita }}">
                             {{ c.tipo_cita.capitalize() }}
                         </span>
                     </td>
-                    <td>
-                       <span class="pill {{ c.tipo_cita }}">
-                          {{ c.tipo_cita.capitalize() }}
-                       </span>
 
-                       {% if c.tipo_cita == 'domicilio' and c.direccion_domicilio %}
-                         <br>
-                         <small style="color:#6b7280;">
-                           {{ c.direccion_domicilio }}
-                         </small>
-                       {% endif %}
-                   </td>
-                    
+                    <!-- DIRECCIÓN DOMICILIO -->
+                    <td style="max-width:200px;font-size:12px;color:#6b7280;">
+                        {% if c.tipo_cita == 'domicilio' and c.direccion_domicilio %}
+                            {{ c.direccion_domicilio }}
+                        {% else %}
+                            <span style="color:#d1d5db">—</span>
+                        {% endif %}
+                    </td>
 
+                    <!-- ORDEN -->
                     <td>
                         {% if c.orden_medica %}
                         <a href="/asesor/orden/{{ c.id }}" target="_blank" class="btn btn-orden">
@@ -447,16 +446,20 @@ td:first-child {
                         {% endif %}
                     </td>
 
+                    <!-- FECHA -->
                     <td style="white-space:nowrap">
                         {{ c.fecha_cita.strftime('%d/%m/%Y') if c.fecha_cita else '—' }}
                     </td>
 
+                    <!-- HORA -->
                     <td style="white-space:nowrap;font-family:'DM Mono',monospace;font-size:12px">
                         {{ c.hora_cita or 'Por asignar' }}
                     </td>
 
+                    <!-- COBERTURA -->
                     <td>{{ c.cobertura or '—' }}</td>
 
+                    <!-- PÓLIZA -->
                     <td>
                         {% if c.cobertura and c.cobertura|lower == 'poliza' %}
                             {{ c.aseguradora or '—' }}
@@ -465,20 +468,24 @@ td:first-child {
                         {% endif %}
                     </td>
 
+                    <!-- EXAMEN -->
                     <td style="max-width:140px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="{{ c.tipo_examen }}">
                         {{ c.tipo_examen or '—' }}
                     </td>
 
+                    <!-- ESTADO -->
                     <td>
                         <span class="pill {{ c.estado }}">
                             {{ c.estado.capitalize() }}
                         </span>
                     </td>
 
+                    <!-- REGISTRADA -->
                     <td style="white-space:nowrap;font-size:12px;color:var(--muted)">
                         {{ c.creada_en.strftime('%d/%m/%Y %H:%M') if c.creada_en else '—' }}
                     </td>
 
+                    <!-- ACCIONES -->
                     <td>
                         <div class="actions">
                             {% if c.estado == 'pendiente' %}
@@ -506,4 +513,4 @@ td:first-child {
 </div>
 
 </body>
-</html>
+</html>         
