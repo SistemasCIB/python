@@ -251,8 +251,81 @@ textarea{
                         </option>
                         {% endfor %}
                     </select>
-                </div>           
+                </div>  
+                <div>
+                    <label>Cobertura</label>
+                    <select name="cobertura" required>
+                        <option value="particular"
+                        {% if cita and cita.cobertura == 'particular' %}selected{% endif %}>
+                        Particular
+                        </option>
 
+                        <option value="poliza"
+                        {% if cita and cita.cobertura == 'poliza' %}selected{% endif %}>
+                        Póliza
+                        </option>
+                </div>  
+                <div>
+                    <label>Póliza / Aseguradora</label>
+                    <select name = "aseguradora">
+                        <option value="" {% if cita and not cita.aseguradora %}selected{% endif %}>N/A</option>
+                        <option value="sura" {% if cita and cita.aseguradora == 'Poliza sura' %}selected{% endif %}>Poliza sura</option>
+                        <option value="Coomeva" {% if cita and cita.aseguradora == 'Coomeva' %}selected{% endif %}>Coomeva</option>
+                        <option value="Medplus" {% if cita and cita.aseguradora == 'Medplus' %}selected{% endif %}>Medplus</option>
+                        <option value="Seguros Bolivar" {% if cita and cita.aseguradora == 'Seguros Bolivar' %}selected{% endif %}>Seguros Bolivar</option>
+
+                </div>
+                <div class="full">
+                  <label>Tipo de examen</label>
+                  <select name="tipo_examen">
+                     <option value="">Seleccionar</option>
+
+                     <option value="Directo hongos"
+                     {% if cita and cita.tipo_examen == 'Directo hongos' %}selected{% endif %}>
+                     Directo hongos
+                     </option>
+
+                     <option value="Hongos + Cultivo"
+                     {% if cita and cita.tipo_examen == 'Hongos + Cultivo' %}selected{% endif %}>
+                     Hongos + Cultivo
+                     </option>
+
+                     <option value="Galactomanan"
+                     {% if cita and cita.tipo_examen == 'Galactomanan' %}selected{% endif %}>
+                     Galactomanan
+                     </option>
+
+                     <option value="Cryptococcus"
+                     {% if cita and cita.tipo_examen == 'Cryptococcus' %}selected{% endif %}>
+                     Cryptococcus
+                     </option>
+
+                     <option value="Serologia hongos"
+                     {% if cita and cita.tipo_examen == 'Serologia hongos' %}selected{% endif %}>
+                     Serologia hongos
+                     </option>
+
+                     <option value="Serologia endemicos"
+                     {% if cita and cita.tipo_examen == 'Serologia endemicos' %}selected{% endif %}>
+                     Serologia endemicos
+                     </option>
+
+                     <option value="IGRAs"
+                     {% if cita and cita.tipo_examen == 'IGRAs' %}selected{% endif %}>
+                     IGRAs
+                     </option>
+
+                     <option value="Tuberculina PPD"
+                     {% if cita and cita.tipo_examen == 'Tuberculina PPD' %}selected{% endif %}>
+                     Tuberculina PPD
+                     </option>
+
+                     <option value="Otro examen"
+                     {% if cita and cita.tipo_examen == 'Otro examen' %}selected{% endif %}>
+                     Otro examen
+                     </option>
+                 </select>
+              </div>
 
 
                 <div>
