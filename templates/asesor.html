@@ -56,25 +56,10 @@ header span{
     font-weight:500;
 }
 
-.btn-nueva{
-    background:#2baa60;
-    color:white;
-}
-
-.btn-exportar{
-    background:#2980b9;
-    color:white;
-}
-
-.btn-historial{
-    background:#8e44ad;
-    color:white;
-}
-
-.btn-logout{
-    border:1px solid #777;
-    color:#ddd;
-}
+.btn-nueva{ background:#2baa60; color:white; }
+.btn-exportar{ background:#2980b9; color:white; }
+.btn-historial{ background:#8e44ad; color:white; }
+.btn-logout{ border:1px solid #777; color:#ddd; }
 
 /* CONTENT */
 
@@ -120,7 +105,7 @@ header span{
 .table-box{
     background:white;
     border-radius:10px;
-    overflow:hidden;
+    overflow:auto;
     border:1px solid #e5e5e5;
 }
 
@@ -133,6 +118,7 @@ header span{
 table{
     width:100%;
     border-collapse:collapse;
+    min-width:1600px;
 }
 
 th{
@@ -164,35 +150,13 @@ tr:hover td{
     display:inline-block;
 }
 
-.pendiente{
-    background:#fff3e0;
-    color:#e67e22;
-}
+.pendiente{ background:#fff3e0; color:#e67e22; }
+.confirmada{ background:#e8f8ef; color:#27ae60; }
+.rechazada{ background:#fdecea; color:#c0392b; }
+.cancelada{ background:#f0f0f0; color:#888; }
 
-.confirmada{
-    background:#e8f8ef;
-    color:#27ae60;
-}
-
-.rechazada{
-    background:#fdecea;
-    color:#c0392b;
-}
-
-.cancelada{
-    background:#f0f0f0;
-    color:#888;
-}
-
-.presencial{
-    background:#e8f0fe;
-    color:#1a73e8;
-}
-
-.domicilio{
-    background:#f4e8fd;
-    color:#7b1fa2;
-}
+.presencial{ background:#e8f0fe; color:#1a73e8; }
+.domicilio{ background:#f4e8fd; color:#7b1fa2; }
 
 /* ACTIONS */
 
@@ -210,20 +174,9 @@ tr:hover td{
     font-weight:600;
 }
 
-.btn-confirm{
-    background:#e8f8ef;
-    color:#27ae60;
-}
-
-.btn-edit{
-    background:#e8f0fe;
-    color:#1a73e8;
-}
-
-.btn-reject{
-    background:#fdecea;
-    color:#c0392b;
-}
+.btn-confirm{ background:#e8f8ef; color:#27ae60; }
+.btn-edit{ background:#e8f0fe; color:#1a73e8; }
+.btn-reject{ background:#fdecea; color:#c0392b; }
 
 .empty{
     text-align:center;
@@ -246,30 +199,16 @@ tr:hover td{
 
         <span>{{ asesor_nombre }}</span>
 
-        <a href="/asesor/nueva" class="btn-header btn-nueva">
-            Nueva cita
-        </a>
-
-        <a href="/asesor/exportar" class="btn-header btn-exportar">
-            Exportar CSV
-        </a>
-
-        <a href="/asesor/historial" class="btn-header btn-historial">
-            Historial
-        </a>
-
-        <a href="/asesor/logout" class="btn-header btn-logout">
-            Salir
-        </a>
+        <a href="/asesor/nueva" class="btn-header btn-nueva">Nueva cita</a>
+        <a href="/asesor/exportar" class="btn-header btn-exportar">Exportar CSV</a>
+        <a href="/asesor/historial" class="btn-header btn-historial">Historial</a>
+        <a href="/asesor/logout" class="btn-header btn-logout">Salir</a>
 
     </div>
 
 </header>
 
-
 <div class="content">
-
-    <!-- STATS -->
 
     <div class="stats">
 
@@ -301,8 +240,6 @@ tr:hover td{
 
     </div>
 
-    <!-- TABLE -->
-
     <div class="table-box">
 
         <div class="table-header">
@@ -320,6 +257,9 @@ tr:hover td{
                     <th>Tipo Documento</th>
                     <th>Documento</th>
                     <th>Telefono</th>
+                    <th>Cobertura</th>
+                    <th>Póliza</th>
+                    <th>Tipo Examen</th>
                     <th>Tipo Cita</th>
                     <th>Orden Médica</th>
                     <th>Fecha</th>
@@ -338,14 +278,25 @@ tr:hover td{
 
                     <td>{{ c.id }}</td>
 
-                    <td>
-                        <strong>{{ c.nombre }}</strong>
-                    </td>
+                    <td><strong>{{ c.nombre }}</strong></td>
 
                     <td>{{ c.tipo_documento }}</td>
+
                     <td>{{ c.documento }}</td>
 
                     <td>{{ c.telefono }}</td>
+
+                    <td>{{ c.tipo_cobertura or '-' }}</td>
+
+                    <td>
+                        {% if c.tipo_cobertura == 'poliza' %}
+                            {{ c.aseguradora or '-' }}
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
+
+                    <td>{{ c.tipo_examen or '-' }}</td>
 
                     <td>
                         <span class="pill {{ c.tipo_cita }}">
@@ -363,29 +314,24 @@ tr:hover td{
                         {% endif %}
                     </td>
 
-                    <!-- FECHA -->
                     <td>
                         {{ c.fecha_cita.strftime('%d/%m/%Y') if c.fecha_cita else '' }}
                     </td>
 
-                    <!-- HORA -->
                     <td>
                         {{ c.hora_cita or 'Por asignar' }}
                     </td>
 
-                    <!-- ESTADO -->
                     <td>
                         <span class="pill {{ c.estado }}">
                             {{ c.estado.capitalize() }}
                         </span>
                     </td>
 
-                    <!-- REGISTRADA -->
                     <td>
                         {{ c.creada_en.strftime('%d/%m/%Y %H:%M') if c.creada_en else '' }}
                     </td>
 
-                    <!-- ACCIONES -->
                     <td>
 
                         <div class="actions">
