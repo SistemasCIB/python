@@ -225,7 +225,7 @@ def mostrar_fechas_disponibles(numero, sesiones):
 
     # =====================================================
     # 🏥 PRESENCIAL
-    # Máximo 17 citas de lunes a viernes
+    # Máximo 17 citas de martes a viernes
     # maximo 9 citas los viernes 
     # Desde 2 días en adelante
     # =====================================================
@@ -235,7 +235,7 @@ def mostrar_fechas_disponibles(numero, sesiones):
 
         while len(dias) < 3:
 
-            if dia.weekday() < 5:   # lunes a viernes
+            if dia.weekday() < 4:   # martes a viernes
                 es_viernes = (dia.weekday() == 4)
                 cupo_maximo = 9 if es_viernes else 17
                 
