@@ -412,15 +412,11 @@ def mostrar_horas_disponibles(numero, sesiones):
         })
 
     # Max 10 filas por sección
-    secciones = []
-    if len(rows) <= 10:
-        secciones = [{"title": "Horas disponibles", "rows": rows}]
-    else:
-        secciones = [
-            {"title": "Mañana",  "rows": rows[:10]},
-            {"title": "Tarde",   "rows": rows[10:]}
-        ]
+    secciones = [{
+       "title": "Horas disponibles",
+         "rows": rows[:10]
 
+    }]
     data = {
         "messaging_product": "whatsapp",
         "recipient_type": "individual",
@@ -437,6 +433,26 @@ def mostrar_horas_disponibles(numero, sesiones):
     }
 
     enviar_request(data)
+    if len(rows) > 10:
+         data2 = {
+           "messaging_product": "whatsapp",
+           "recipient_type": "individual",
+           "to": numero,
+           "type": "interactive",
+           "interactive": {
+              "type": "list",
+              "body": {"text": "🕐 Más horarios disponibles:"},
+              "action": {
+                 "button": "Ver más",
+                 "sections": [{
+                    "title": "Horas adicionales",
+                    "rows": rows[10:]
+                }]
+            }
+        }
+    }
+
+    enviar_request(data2)   
 
 def enviar_tipo_documento(numero):
     data = {
