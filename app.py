@@ -59,19 +59,16 @@ def ver_orden(cita_id):
         return "Esta cita no tiene orden médica.", 404
 
     ruta_local = os.path.join(
-        app.root_path,
-        'static',
-        'uploads',
-        cita.orden_medica
+        app.root_path, 'static', 'uploads', cita.orden_medica
     )
 
-    # Si existe localmente
+    # Si existe localmente → sirve directo
     if os.path.exists(ruta_local):
         return redirect(
             url_for('static', filename='uploads/' + cita.orden_medica)
         )
 
-    # Si no existe local -> consultar Meta
+    # Si es media_id de Meta → descargar con token y servir
     headers = {"Authorization": f"Bearer {TOKEN_META}"}
 
     r = req_lib.get(
@@ -87,7 +84,19 @@ def ver_orden(cita_id):
     if not url_archivo:
         return "No se pudo obtener la URL del archivo.", 500
 
-    return redirect(url_archivo)
+    # ✅ Descargar con token y devolver al navegador — NO hacer redirect
+    archivo = req_lib.get(url_archivo, headers=headers)
+
+    from flask import Response
+    tipo_mime = cita.orden_tipo_archivo or "application/octet-stream"
+
+    return Response(
+        archivo.content,
+        mimetype=tipo_mime,
+        headers={
+            "Content-Disposition": f"inline; filename=orden_{cita_id}"
+        }
+    )
 
 
 if __name__ == '__main__':
