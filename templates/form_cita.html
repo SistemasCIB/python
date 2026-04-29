@@ -271,12 +271,13 @@ textarea{
                         {% if cita and cita.cobertura == 'poliza' %}selected{% endif %}>
                         Póliza
                         </option>
+                    </select>    
                 </div>  
                 <div>
                     <label>Póliza / Aseguradora</label>
                     <select name = "aseguradora">
                         <option value="" {% if cita and not cita.aseguradora %}selected{% endif %}>N/A</option>
-                        <option value="sura" {% if cita and cita.aseguradora == 'Poliza sura' %}selected{% endif %}>Poliza sura</option>
+                        <option value="Poliza sura" {% if cita and cita.aseguradora == 'Poliza sura' %}selected{% endif %}>Poliza sura</option>
                         <option value="Coomeva" {% if cita and cita.aseguradora == 'Coomeva' %}selected{% endif %}>Coomeva</option>
                         <option value="Medplus" {% if cita and cita.aseguradora == 'Medplus' %}selected{% endif %}>Medplus</option>
                         <option value="Seguros Bolivar" {% if cita and cita.aseguradora == 'Seguros Bolivar' %}selected{% endif %}>Seguros Bolivar</option>
