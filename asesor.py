@@ -116,6 +116,9 @@ def exportar_excel():
         mimetype='text/csv',
         headers={"Content-Disposition": "attachment;filename=citas_cib.csv"}
     )
+
+
+
 @asesor_bp.route('/asesor/nueva', methods=['GET', 'POST'])
 @login_requerido
 def nueva_cita():
@@ -130,6 +133,12 @@ def nueva_cita():
             ruta = os.path.join('static/uploads', nombre_archivo)
             archivo.save(ruta)
 
+        # CORREGIR FECHA
+        fecha_cita = datetime.strptime(
+            request.form['fecha_cita'],
+            '%Y-%m-%d'
+        )
+
         cita = Cita(
             nombre=request.form['nombre'],
             tipo_documento=request.form['tipo_documento'],
@@ -137,12 +146,11 @@ def nueva_cita():
             telefono=request.form['telefono'],
             tipo_cita=request.form['tipo_cita'],
             orden_medica=nombre_archivo,
-            fecha_cita=request.form['fecha_cita'],
+            fecha_cita=fecha_cita,
             hora_cita=request.form['hora_cita'],
             numero_whatsapp=request.form['telefono'],
             estado=request.form['estado']
         )
-        
 
         db.session.add(cita)
         db.session.commit()
@@ -162,6 +170,7 @@ def nueva_cita():
 
     return render_template('form_cita.html', cita=None)
 
+
 @asesor_bp.route('/asesor/editar/<int:cita_id>', methods=['GET', 'POST'])
 @login_requerido
 def editar_cita(cita_id):
@@ -169,12 +178,19 @@ def editar_cita(cita_id):
     cita = Cita.query.get_or_404(cita_id)
 
     if request.method == 'POST':
+
         cita.nombre = request.form['nombre']
         cita.tipo_documento = request.form['tipo_documento']
         cita.documento = request.form['documento']
         cita.telefono = request.form['telefono']
         cita.tipo_cita = request.form['tipo_cita']
-        cita.fecha_cita = request.form['fecha_cita']
+
+        # CORREGIR FECHA
+        cita.fecha_cita = datetime.strptime(
+            request.form['fecha_cita'],
+            '%Y-%m-%d'
+        )
+
         cita.hora_cita = request.form['hora_cita']
         cita.estado = request.form['estado']
 
@@ -188,6 +204,7 @@ def editar_cita(cita_id):
             cita.orden_medica = nombre_archivo
 
         db.session.commit()
+
 
         log = Auditoria(
             asesor_id=session['asesor_id'],
