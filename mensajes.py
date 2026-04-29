@@ -235,7 +235,7 @@ def mostrar_fechas_disponibles(numero, sesiones):
 
         while len(dias) < 3:
 
-            if dia.weekday() < 4:   # martes a viernes
+            if 1 <= dia.weekday() <= 4:   # martes a viernes
                 es_viernes = (dia.weekday() == 4)
                 cupo_maximo = 9 if es_viernes else 17
                 
@@ -404,13 +404,22 @@ def mostrar_horas_disponibles(numero, sesiones):
     }
 
     rows = []
-
-    for i, hora in enumerate(libres):   
-        rows.append({ 
-                "id": f"hora_{i+1}",
-                "title": hora
-            
+    for i, hora in enumerate(libres):
+        rows.append({
+            "id": f"hora_{i+1}",
+            "title": hora,
+            "description": ""
         })
+
+    # Max 10 filas por sección
+    secciones = []
+    if len(rows) <= 10:
+        secciones = [{"title": "Horas disponibles", "rows": rows}]
+    else:
+        secciones = [
+            {"title": "Mañana",  "rows": rows[:10]},
+            {"title": "Tarde",   "rows": rows[10:]}
+        ]
 
     data = {
         "messaging_product": "whatsapp",
@@ -419,15 +428,10 @@ def mostrar_horas_disponibles(numero, sesiones):
         "type": "interactive",
         "interactive": {
             "type": "list",
-            "body": {
-                "text": "🕐 Selecciona una hora disponible:"
-            },
+            "body": {"text": "🕐 Selecciona una hora disponible:"},
             "action": {
                 "button": "Ver horas",
-                "sections": [{
-                    "title": "Horas disponibles",
-                    "rows": rows
-                }]
+                "sections": secciones
             }
         }
     }
