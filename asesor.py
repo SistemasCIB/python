@@ -145,6 +145,10 @@ def nueva_cita():
             documento=request.form['documento'],
             telefono=request.form['telefono'],
             tipo_cita=request.form['tipo_cita'],
+            direccion_domicilio=request.form.get('direccion_domicilio', ''),
+            cobertura=request.form.get('cobertura', ''),
+            aseguradora=request.form.get('aseguradora', ''),
+            tipo_examen=request.form.get('tipo_examen', ''),
             orden_medica=nombre_archivo,
             fecha_cita=fecha_cita,
             hora_cita=request.form['hora_cita'],
@@ -184,6 +188,10 @@ def editar_cita(cita_id):
         cita.documento = request.form['documento']
         cita.telefono = request.form['telefono']
         cita.tipo_cita = request.form['tipo_cita']
+        cita.direccion_domicilio = request.form.get('direccion_domicilio', '')
+        cita.cobertura = request.form.get('cobertura', '')
+        cita.aseguradora = request.form.get('aseguradora', '')
+        cita.tipo_examen = request.form.get('tipo_examen', '')
 
         # CORREGIR FECHA
         cita.fecha_cita = datetime.strptime(
