@@ -24,8 +24,7 @@ class Paciente(db.Model):
 
 class Cita(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    paciente_id = db.Column(db.Integer, db.ForeignKey('paciente.id'))  # ← nuevo
-    # quita: nombre, tipo_documento, documento, correo, direccion, telefono
+    paciente_id = db.Column(db.Integer, db.ForeignKey('paciente.id'))  
     tipo_cita = db.Column(db.String(20))
     direccion_domicilio = db.Column(db.String(300))
     orden_medica = db.Column(db.String(500))

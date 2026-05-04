@@ -455,6 +455,55 @@ def manejar_texto(numero, texto):
         )
         return
 
+    # -----------------------------------
+    # POST CITA (re-agendar)
+    # -----------------------------------
+    elif paso == "post_cita":
+
+        if texto == "1":
+            # MISMO PACIENTE
+            sesiones[numero]["paso"] = "cobertura"
+
+            enviar_texto(
+                numero,
+                "Perfecto 👍 agendaremos otra cita con los mismos datos."
+            )
+
+            enviar_tipo_cobertura(numero)
+            return
+
+        elif texto == "2":
+            # OTRO PACIENTE
+            sesiones[numero] = {
+                "flujo": "agendar",
+                "paso": "buscar_documento"
+            }
+
+            enviar_texto(
+                numero,
+                "📋 Ingresa el documento del nuevo paciente:"
+            )
+            return
+
+        elif texto == "3":
+            # TERMINAR
+            enviar_texto(
+                numero,
+                "Gracias por confiar en nosotros 💙"
+            )
+
+            sesiones[numero] = {
+                "modo": "humano",
+                "modo_humano_inicio": datetime.utcnow()
+            }
+            return
+
+        else:
+            enviar_texto(
+                numero,
+                "Por favor responde con:\n1, 2 o 3"
+            )
+            return
 
 def manejar_archivo(numero, media_id, tipo_mime):
     if numero not in sesiones:
@@ -465,6 +514,7 @@ def manejar_archivo(numero, media_id, tipo_mime):
     sesiones[numero]["orden"] = media_id
     sesiones[numero]["tipo_archivo"] = tipo_mime
     confirmar_cita(numero)
+
 
 
 
@@ -539,8 +589,14 @@ def confirmar_cita(numero):
         enviar_texto(
             numero,
             "✅ Tu solicitud fue enviada correctamente.\n\n"
-            "Un asesor validará la información y confirmará tu cita."
+            "Un asesor validará la información y confirmará tu cita.\n\n"
+            "¿Deseas agendar otra cita?\n\n"
+            "1️⃣ Mismo paciente\n" 
+            "2️⃣ Otro paciente\n"
+            "3️⃣ No, gracias"
         )
+        sesiones[numero]["paso"] = "post_cita"
+        return
 
     except Exception as e:
         db.session.rollback()
