@@ -15,7 +15,7 @@ from mensajes import (
     mostrar_horas_disponibles
 )
 
-from config import LINK_ASESOR, HORARIO_INICIO, HORARIO_FIN, URL_RESULTADOS
+from config import LINK_ASESOR, HORARIO_INICIO, HORARIO_FIN, URL_RESULTADOS, LINK_ALIMENTATEC, LINK_EDITORIAL
 from datetime import datetime, timedelta
 
 sesiones = {}
@@ -77,7 +77,15 @@ def manejar_boton(numero, opcion_id):
     elif opcion_id == "soy_cliente":
         enviar_texto(
             numero,
-            f"Para clientes institucionales comunícate a:\n{LINK_ASESOR}"
+            "Estimados clientes,\n\n"
+            "Les informamos que a partir de la fecha, todas las comunicaciones o solicitudes relacionadas con:\n"
+            "• Estado de resultados\n"
+            "• Dudas de remisiones\n"
+            "• Inquietudes sobre tipos y/o requisitos de muestrass\n"
+            "• Información sobre días y horarios de procedimientos de laboratorio\n"
+            "• Entre otros similares\n\n"
+            f"Deberán realizarse exclusivamente a través de nuestra línea de WhatsApp: \n{LINK_ASESOR}\n\n"
+            "Agradecemos su comprensión y colaboración para centralizar la atención y brindarles un mejor servicio."
         )
         return
 
@@ -102,7 +110,10 @@ def manejar_boton(numero, opcion_id):
     elif opcion_id == "no_acepto_datos":
         enviar_texto(
             numero,
-            "Para continuar debes aceptar la política de datos."
+            "👋 Gracias por contactarnos.\n\n"
+            "Para poder atender tu solicitud es necesario aceptar nuestra política de tratamiento de datos.\n\n"
+            "Si en otro momento decides continuar, estaremos atentos para ayudarte\n\n"
+            "¡Que tengas un buen día! 💙"
         )
         return
 
@@ -130,12 +141,32 @@ def manejar_boton(numero, opcion_id):
     elif opcion_id == "resultados":
         enviar_texto(
             numero,
-            f"Ingreso resultados:\n{URL_RESULTADOS}"
+            "Paso a paso para la consulta de resultados de Laboratorio:\n\n"
+            f"1. Ingresa en el siguiente enlace directo para la consulta de su resultado: \n{URL_RESULTADOS}\n\n"
+            "2. Ingresa a RESULTADOS LABCORE.\n"
+            "3. Ingresa en usuario: el número de identificación y en contraseña: los ultimos cuatro digitos del número de identificación.\n"
+            "Presiona el botón DESCARGAR RESULTADO.\n\n"
+            "Muchas gracias por confiar en nosotros."
         )
         return
 
     elif opcion_id == "otros":
-        enviar_texto(numero, "Próximamente.")
+        enviar_texto(
+            numero, 
+            "ℹ️ Otros servicios\n\n"
+            "Si tu solicitud no es sobre citas o resultados, puedes comunicarte según corresponda :\n\n"
+            "📚 Fondo editorial CIB\n"
+            f"📲 {LINK_EDITORIAL}\n"
+            "📧 gestorcomercial@cib.org.co\n\n"
+            "🥗 Programa ALIMENTATEC\n"
+            f"📲 {LINK_ALIMENTATEC}\n"
+            "📧 alimentatec@cib.org.co\n\n"
+            "📌 Generalidades\n"
+            "📧 comunicacionesymercadeo@cib.org.co\n\n"
+            "Gracias por comunicarse con nosotros💙"
+
+
+        )
         return
 
     elif opcion_id == "terminar":
@@ -195,14 +226,14 @@ def manejar_boton(numero, opcion_id):
     elif opcion_id.startswith("examen_"):
 
         examenes = {
-            "examen_directo_hongos": "Examen directo hongos",
+            "examen_directo_hongos": "Examen directo para hongos",
             "examen_directo_cultivo": "Hongos + Cultivo",
-            "examen_galactomanano": "Galactomanan",
-            "examen_cryptococcus": "Cryptococcus",
+            "examen_galactomanano": "Antigeno galactomanan",
+            "examen_cryptococcus": "Antigeno cryptococcus",
             "examen_serologia_inmuno": "Serologia hongos",
             "examen_serologia_complemento": "Serologia endemicos",
             "examen_igra": "IGRAs",
-            "examen_ppd": "Tuberculina"
+            "examen_ppd": "Tuberculina PPD"
         }
 
         if opcion_id == "examen_otro":
@@ -589,7 +620,12 @@ def confirmar_cita(numero):
         enviar_texto(
             numero,
             "✅ Tu solicitud fue enviada correctamente.\n\n"
-            "Un asesor validará la información y confirmará tu cita.\n\n"
+            "Tu solicitud será revisada antes de confirmar la cita.\n\n"
+            "Agendar y terminar este proceso no garantiza la cita inmediata.\n"
+            "Recibirás confirmación por este medio.\n\n"
+            " 🕘 Horario de atención: 9:00 AM - 12:00 PM\n\n"
+            "Gracias por confiar en nosotros💙"
+
             "¿Deseas agendar otra cita?\n\n"
             "1️⃣ Mismo paciente\n" 
             "2️⃣ Otro paciente\n"

@@ -603,23 +603,23 @@ def enviar_tipo_examen(numero):
                         "rows": [
                             {
                                 "id": "examen_directo_hongos",
-                                "title": "Directo hongos",
+                                "title": "Directo para hongos",
                                 "description": "Fresco o KOH"
                             },
                             {
                                 "id": "examen_directo_cultivo",
                                 "title": "Hongos + Cultivo",
-                                "description": "Micosis superficiales"
+                                "description": "Micosis superficiales y subcutaneas"
                             },
                             {
                                 "id": "examen_galactomanano",
-                                "title": "Galactomanan",
-                                "description": "Aspergillus"
+                                "title": "Antigeno galactomanan",
+                                "description": "Aspergillus (PLATELIA)"
                             },
                             {
                                 "id": "examen_cryptococcus",
-                                "title": "Cryptococcus",
-                                "description": "Lateral Flow Assay"
+                                "title": "Antigeno cryptococcus",
+                                "description": "Lateral Flow Assay(LFA)"
                             },
                             {
                                 "id": "examen_serologia_inmuno",
@@ -634,7 +634,7 @@ def enviar_tipo_examen(numero):
                             {
                                 "id": "examen_igra",
                                 "title": "IGRAs",
-                                "description": "QuantiFERON-TB"
+                                "description": "Ensayo de liberación de Interferón Gamma QuantiFERON-TB"
                             },
                             {
                                 "id": "examen_ppd",
