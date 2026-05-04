@@ -49,7 +49,10 @@ class Asesor(db.Model):
     usuario = db.Column(db.String(50), unique=True)
     nombre = db.Column(db.String(100))
     password_hash = db.Column(db.Text, nullable=False)
-
+    rol = db.Column(db.String(20), default='asesor')        # ← nuevo
+    activo = db.Column(db.Boolean, default=True)            # ← nuevo
+    creado_en = db.Column(db.DateTime, default=datetime.utcnow)
+    
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
 

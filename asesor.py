@@ -15,7 +15,13 @@ def login_requerido(f):
     def decorated(*args, **kwargs):
         if not session.get('asesor_id'):
             return redirect(url_for('asesor.login'))
+        asesor = Asesor.query.get(session.get('asesor_id'))
+        if not asesor or not asesor.activo:
+            session.clear()
+            return redirect(url_for('asesor.login'))
+
         return f(*args, **kwargs)
+    
     return decorated
 
 @asesor_bp.route('/asesor/login', methods=['GET', 'POST'])

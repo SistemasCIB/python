@@ -4,6 +4,7 @@ from webhook import webhook_bp
 from asesor import asesor_bp
 from config import SECRET_KEY, TOKEN_META
 from datetime import datetime
+from admin_routes import admin_bp, admin_requerido
 import os
 import requests as req_lib
 from flask_sqlalchemy import SQLAlchemy
@@ -16,16 +17,18 @@ app.config['SECRET_KEY'] = SECRET_KEY
 db.init_app(app)
 app.register_blueprint(webhook_bp)
 app.register_blueprint(asesor_bp)
-
+app.register_blueprint(admin_bp)
 with app.app_context():
     db.create_all()
     # Crear asesor por defecto si no existe
     if not Asesor.query.filter_by(usuario='admin').first():
-        asesor = Asesor(usuario='admin', nombre='Administrador')
+        asesor = Asesor(usuario='test', nombre='asesor test')
         asesor.set_password('cib2025')
         db.session.add(asesor)
         db.session.commit()
         print("Asesor creado: admin / cib2025")
+
+
 
 @app.teardown_appcontext
 def shutdown_session(exception=None):
