@@ -148,6 +148,7 @@ def manejar_boton(numero, opcion_id):
             "Presiona el botón DESCARGAR RESULTADO.\n\n"
             "Muchas gracias por confiar en nosotros."
         )
+        enviar_menu(numero)
         return
 
     elif opcion_id == "otros":
@@ -167,6 +168,7 @@ def manejar_boton(numero, opcion_id):
 
 
         )
+        enviar_menu(numero)
         return
 
     elif opcion_id == "terminar":
