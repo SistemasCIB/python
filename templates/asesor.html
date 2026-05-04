@@ -329,6 +329,18 @@ td:first-child {
 
 <div class="content">
 
+    <!--FILTRO -->
+    <form method="GET" style="margin-bottom:20px; display:flex; gap:10px;">
+        <input type="text"
+               name="documento"
+               placeholder="Buscar por cédula"
+               value="{{ documento_filtro or '' }}"
+               style="padding:8px;border:1px solid #ccc;border-radius:6px;">
+
+        <button type="submit" class="btn btn-edit">Buscar</button>
+        <a href="/asesor" class="btn btn-reject">Limpiar</a>
+    </form>
+
     <!-- STATS -->
     <div class="stats">
 
@@ -411,13 +423,13 @@ td:first-child {
 
                     <td>
                         <div class="nombre-cell">
-                            <strong>{{ c.nombre }}</strong>
-                            <small>{{ c.tipo_documento }}</small>
+                            <strong>{{ c.paciente.nombre }}</strong>
+                            <small>{{ c.paciente.tipo_documento }}</small>
                         </div>
                     </td>
 
-                    <td>{{ c.documento }}</td>
-                    <td>{{ c.telefono }}</td>
+                    <td>{{ c.paciente.documento }}</td>
+                    <td>{{ c.paciente.telefono }}</td>
 
                     <!-- TIPO CITA -->
                     <td>

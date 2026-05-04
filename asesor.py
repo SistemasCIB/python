@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, request, redirect, url_for, session, jsonify
-from models import db, Cita, Asesor, Auditoria, ChatActivo
+from models import db, Cita, Asesor, Auditoria, ChatActivo, Paciente
 from datetime import datetime, timedelta
 from mensajes import enviar_texto
 from config import HORARIO_INICIO, HORARIO_FIN
@@ -40,12 +40,24 @@ def logout():
 @asesor_bp.route('/asesor')
 @login_requerido
 def panel():
-    citas = Cita.query.order_by(Cita.creada_en.desc()).all()
-    return render_template('asesor.html',
+
+    documento = request.args.get('documento', '').strip()
+
+    # 🔥 join con Paciente (OBLIGATORIO)
+    query = Cita.query.join(Paciente)
+
+    if documento:
+        query = query.filter(Paciente.documento.ilike(f"%{documento}%"))
+
+    citas = query.order_by(Cita.creada_en.desc()).all()
+
+    return render_template(
+        'asesor.html',
         citas=citas,
         asesor_nombre=session.get('asesor_nombre'),
         horario_inicio=HORARIO_INICIO,
-        horario_fin=HORARIO_FIN
+        horario_fin=HORARIO_FIN,
+        documento_filtro=documento
     )
 
 @asesor_bp.route('/asesor/confirmar/<int:cita_id>')
@@ -60,13 +72,14 @@ def confirmar_cita(cita_id):
             asesor_nombre=session['asesor_nombre'],
             accion='confirmo',
             cita_id=cita.id,
-            detalle=f'Confirmó cita de {cita.nombre}'
+            detalle=f'Confirmó cita de {cita.paciente.nombre}'
         )
         db.session.add(log)
         db.session.commit()
 
         enviar_texto(cita.numero_whatsapp,
             f"Tu cita ha sido CONFIRMADA!\n\n"
+            f"Nombre: {cita.paciente.nombre}\n"
             f"Tipo: {cita.tipo_cita.capitalize()}\n"
             f"Fecha: {cita.fecha_cita}\n"
             f"Hora: {cita.hora_cita}\n"
@@ -87,7 +100,7 @@ def rechazar_cita(cita_id):
             asesor_nombre=session['asesor_nombre'],
             accion='rechazo',
             cita_id=cita.id,
-            detalle=f'Rechazó cita de {cita.nombre}'
+            detalle=f'Rechazó cita de {cita.paciente.nombre}'
         )
         db.session.add(log)                                 
         db.session.commit()
@@ -106,8 +119,8 @@ def exportar_excel():
     writer = csv.writer(output)
     writer.writerow(['ID','Nombre','Documento','Telefono','Tipo','Orden Médica','Fecha','Hora','WhatsApp','Estado','Registrada'])
     for c in citas:
-        writer.writerow([c.id, c.nombre, c.documento, c.telefono,
-                        c.tipo_cita, c.orden_medica, c.fecha_cita,
+        writer.writerow([c.id, c.paciente.nombre, c.paciente.documento, c.paciente.telefono,
+                        c.tipo_cita, c.orden_medica, c.cobertura,c.aseguradora, c.fecha_cita,
                         c.hora_cita, c.numero_whatsapp, c.estado,
                         c.creada_en.strftime('%d/%m/%Y %H:%M')])
     output.seek(0)
@@ -139,11 +152,20 @@ def nueva_cita():
             '%Y-%m-%d'
         )
 
+        paciente = Paciente.query.filter_by(documento=request.form['documento']).first()
+        if not paciente:
+            paciente = Paciente(
+                nombre=request.form['nombre'],
+                tipo_documento=request.form['tipo_documento'],
+                documento=request.form['documento'],
+                telefono=request.form['telefono'],
+                correo=request.form.get('correo', ''),
+            )
+            db.session.add(paciente)
+            db.session.commit()
+
         cita = Cita(
-            nombre=request.form['nombre'],
-            tipo_documento=request.form['tipo_documento'],
-            documento=request.form['documento'],
-            telefono=request.form['telefono'],
+            paciente_id=paciente.id,
             tipo_cita=request.form['tipo_cita'],
             direccion_domicilio=request.form.get('direccion_domicilio', ''),
             cobertura=request.form.get('cobertura', ''),
@@ -155,7 +177,6 @@ def nueva_cita():
             numero_whatsapp=request.form['telefono'],
             estado=request.form['estado']
         )
-
         db.session.add(cita)
         db.session.commit()
 
@@ -164,7 +185,7 @@ def nueva_cita():
             asesor_nombre=session['asesor_nombre'],
             accion='creo_manual',
             cita_id=cita.id,
-            detalle=f'Creó cita manual para {cita.nombre}'
+            detalle=f'Creó cita manual para {cita.paciente.nombre}'
         )
 
         db.session.add(log)
@@ -180,20 +201,28 @@ def nueva_cita():
 def editar_cita(cita_id):
 
     cita = Cita.query.get_or_404(cita_id)
+    paciente = cita.paciente  # ← clave con tu nuevo modelo
 
     if request.method == 'POST':
 
-        cita.nombre = request.form['nombre']
-        cita.tipo_documento = request.form['tipo_documento']
-        cita.documento = request.form['documento']
-        cita.telefono = request.form['telefono']
+
+        # =========================
+        paciente.nombre = request.form['nombre']
+        paciente.tipo_documento = request.form['tipo_documento']
+        paciente.documento = request.form['documento']
+        paciente.telefono = request.form['telefono']
+        paciente.correo = request.form.get('correo', '')
+        paciente.direccion = request.form.get('direccion', '')
+        paciente.numero_whatsapp = request.form['telefono']
+
+        # =========================
         cita.tipo_cita = request.form['tipo_cita']
         cita.direccion_domicilio = request.form.get('direccion_domicilio', '')
         cita.cobertura = request.form.get('cobertura', '')
         cita.aseguradora = request.form.get('aseguradora', '')
         cita.tipo_examen = request.form.get('tipo_examen', '')
 
-        # CORREGIR FECHA
+        # Fecha
         cita.fecha_cita = datetime.strptime(
             request.form['fecha_cita'],
             '%Y-%m-%d'
@@ -201,7 +230,11 @@ def editar_cita(cita_id):
 
         cita.hora_cita = request.form['hora_cita']
         cita.estado = request.form['estado']
+        cita.numero_whatsapp = request.form['telefono']
 
+        # =========================
+        # ARCHIVO ORDEN MÉDICA
+        # =========================
         archivo = request.files.get('orden_medica')
 
         if archivo and archivo.filename != '':
@@ -210,6 +243,7 @@ def editar_cita(cita_id):
             archivo.save(ruta)
 
             cita.orden_medica = nombre_archivo
+            cita.orden_tipo_archivo = archivo.content_type  # ← opcional pero recomendado
 
         db.session.commit()
 
@@ -219,7 +253,7 @@ def editar_cita(cita_id):
             asesor_nombre=session['asesor_nombre'],
             accion='editó',
             cita_id=cita.id,
-            detalle=f'Editó cita de {cita.nombre}'
+            detalle=f'Editó cita de {paciente.nombre}'
         )
 
         db.session.add(log)
@@ -240,6 +274,22 @@ def historial():
         logs=logs,
         asesor_nombre=session.get('asesor_nombre')
     )
+@asesor_bp.route('/asesor/buscar_paciente')
+def buscar_paciente():
+    documento = request.args.get('documento')
+
+    paciente = Paciente.query.filter_by(documento=documento).first()
+
+    if paciente:
+        return jsonify({
+            'nombre': paciente.nombre,
+            'tipo_documento': paciente.tipo_documento,
+            'telefono': paciente.telefono
+        })
+
+    return jsonify({})
+
+
 
 @asesor_bp.route('/asesor/tomar_chat/<int:cita_id>')
 @login_requerido

@@ -9,27 +9,35 @@ class Log(db.Model):
     fecha_y_hora = db.Column(db.DateTime, default=datetime.utcnow)
     texto = db.Column(db.TEXT)
 
-class Cita(db.Model):
+class Paciente(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    nombre = db.Column(db.String(100))
     tipo_documento = db.Column(db.String(20))
-    documento = db.Column(db.String(50))
+    documento = db.Column(db.String(50), unique=True, index=True)
+    nombre = db.Column(db.String(100))
+    telefono = db.Column(db.String(20))
     correo = db.Column(db.String(100))
     direccion = db.Column(db.String(200))
-    telefono = db.Column(db.String(20))
-    tipo_cita = db.Column(db.String(20)) # presencial o domicilio       
-    direccion_domicilio = db.Column(db.String(300))  # NUEVO para domicilio
+    numero_whatsapp = db.Column(db.String(20))
+    creado_en = db.Column(db.DateTime, default=datetime.utcnow)
+
+    citas = db.relationship('Cita', backref='paciente', lazy=True)
+
+class Cita(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    paciente_id = db.Column(db.Integer, db.ForeignKey('paciente.id'))  # ← nuevo
+    # quita: nombre, tipo_documento, documento, correo, direccion, telefono
+    tipo_cita = db.Column(db.String(20))
+    direccion_domicilio = db.Column(db.String(300))
     orden_medica = db.Column(db.String(500))
-    orden_tipo_archivo = db.Column(db.String(50))   # NUEVO  ej: image/jpeg, application/pdf
-    cobertura = db.Column(db.String(50))            # NUEVO  Particular / Poliza
-    aseguradora = db.Column(db.String(100))         # NUEVO  Sura / Coomeva / etc
-    tipo_examen = db.Column(db.String(300))         #nombre del examen
+    orden_tipo_archivo = db.Column(db.String(50))
+    cobertura = db.Column(db.String(50))
+    aseguradora = db.Column(db.String(100))
+    tipo_examen = db.Column(db.String(300))
     fecha_cita = db.Column(db.DateTime)
     hora_cita = db.Column(db.String(20))
     numero_whatsapp = db.Column(db.String(20))
-    estado = db.Column(db.String(20), default='pendiente')  # pendiente / confirmada / rechazada / cancelada
+    estado = db.Column(db.String(20), default='pendiente')
     creada_en = db.Column(db.DateTime, default=datetime.utcnow)
- 
 
 class Consentimiento(db.Model):
     id = db.Column(db.Integer, primary_key=True)

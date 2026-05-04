@@ -1,4 +1,4 @@
-from models import db, Cita, Consentimiento, agregar_mensajes_log
+from models import db, Cita,Paciente, Consentimiento, agregar_mensajes_log
 from mensajes import (
     enviar_texto,
     enviar_menu,
@@ -115,13 +115,16 @@ def manejar_boton(numero, opcion_id):
             enviar_fuera_horario(numero)
             return
 
-        # FLUJO: inicia con datos del paciente → tipo_documento
+        #primero busca si ya es un paciente existente
         sesiones[numero] = {
             "flujo": "agendar",
-            "paso": "tipo_documento"
+            "paso": "buscar_documento"
         }
+        enviar_texto(
+            numero,
+            "📋 Para comenzar, escribe tu número de documento de identidad:"
+        )    
 
-        enviar_tipo_documento(numero)
         return
 
     elif opcion_id == "resultados":
@@ -320,6 +323,38 @@ def manejar_texto(numero, texto):
     paso = sesion.get("paso")
 
     # -----------------------------------
+    # BUSCAR PACIENTE POR DOCUMENTO
+    # -----------------------------------
+    if paso == "buscar_documento":
+        from models import Paciente
+
+        paciente = Paciente.query.filter_by(documento=texto.strip()).first()
+
+        if paciente:
+            # Paciente encontrado — cargar datos y saltar al flujo
+            sesiones[numero]["tipo_documento"] = paciente.tipo_documento
+            sesiones[numero]["documento"]      = paciente.documento
+            sesiones[numero]["nombre"]         = paciente.nombre
+            sesiones[numero]["telefono"]       = paciente.telefono
+            sesiones[numero]["correo"]         = paciente.correo
+            sesiones[numero]["direccion"]      = paciente.direccion
+            sesiones[numero]["paso"]           = "cobertura"
+
+            enviar_texto(
+                numero,
+                f"👤 Bienvenido de nuevo, *{paciente.nombre}*.\n"
+                f"Usaremos tus datos registrados."
+            )
+            enviar_tipo_cobertura(numero)
+
+        else:
+            # Paciente nuevo — pedir datos completos
+            sesiones[numero]["paso"] = "tipo_documento"
+            enviar_tipo_documento(numero)
+
+        return
+
+    # -----------------------------------
     # EXAMEN OTRO
     # -----------------------------------
     if paso == "examen_otro_texto":
@@ -438,23 +473,15 @@ def manejar_archivo(numero, media_id, tipo_mime):
 # =====================================================
 
 def confirmar_cita(numero):
-
     sesion = sesiones.get(numero, {})
 
     try:
         from datetime import datetime
 
         # ---------------------------------
-        # FECHA seleccionada desde botones
-        # viene como texto: 30/04/2026
+        # FECHA
         # ---------------------------------
         fecha_texto = sesion.get("fecha_cita", "").strip()
-
-        # ---------------------------------
-        # HORA
-        # presencial = seleccionada
-        # domicilio = por asignar
-        # ---------------------------------
         hora_texto = sesion.get("hora_cita", "").strip()
 
         if hora_texto and hora_texto != "Por asignar":
@@ -468,13 +495,31 @@ def confirmar_cita(numero):
                 "%d/%m/%Y"
             )
 
+        # ---------------------------------
+        # PACIENTE — busca o crea
+        # ---------------------------------
+        paciente = Paciente.query.filter_by(
+            documento=sesion.get("documento")
+        ).first()
+
+        if not paciente:
+            paciente = Paciente(
+                tipo_documento=sesion.get("tipo_documento", ""),
+                documento=sesion.get("documento", ""),
+                nombre=sesion.get("nombre", ""),
+                telefono=sesion.get("telefono", ""),
+                correo=sesion.get("correo", ""),
+                direccion=sesion.get("direccion", ""),
+                numero_whatsapp=numero
+            )
+            db.session.add(paciente)
+            db.session.flush()  # obtiene paciente.id sin commit
+
+        # ---------------------------------
+        # CITA
+        # ---------------------------------
         cita = Cita(
-            tipo_documento=sesion.get("tipo_documento", ""),
-            nombre=sesion.get("nombre", ""),
-            documento=sesion.get("documento", ""),
-            telefono=sesion.get("telefono", ""),
-            correo=sesion.get("correo", ""),
-            direccion=sesion.get("direccion", ""),
+            paciente_id=paciente.id,
             tipo_cita=sesion.get("tipo_cita", ""),
             direccion_domicilio=sesion.get("direccion_domicilio", ""),
             orden_medica=sesion.get("orden", ""),

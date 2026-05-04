@@ -193,31 +193,31 @@ textarea{
                 <div>
                     <label>Nombre completo</label>
                     <input type="text" name="nombre"
-                           value="{{ cita.nombre if cita else '' }}" required>
+                           value="{{ cita.paciente.nombre if cita else '' }}" required>
                 </div>
                 <div>
                     <label>Tipo de documento</label>
                     <select name="tipo_documento" required>
-                        <option value="cc" {% if cita and cita.tipo_documento == 'cc' %}selected{% endif %}>Cédula de ciudadanía</option>
-                        <option value="ti" {% if cita and cita.tipo_documento == 'ti' %}selected{% endif %}>Tarjeta de identidad</option>
-                        <option value="pasaporte" {% if cita and cita.tipo_documento == 'pasaporte' %}selected{% endif %}>Pasaporte</option>
-                        <option value="CE" {% if cita and cita.tipo_documento == 'CE' %}selected{% endif %}>Cedula de extranjeria</option>
-                        <option value="PPT" {% if cita and cita.tipo_documento == 'PPT' %}selected{% endif %}>Permiso por protección temporal</option>
-                        <option value="RC" {% if cita and cita.tipo_documento == 'RC' %}selected{% endif %}>Registro civil</option>
-                        <option value="otro" {% if cita and cita.tipo_documento == 'otro' %}selected{% endif %}>Otro</option>
+                        <option value="cc" {% if cita and cita.paciente.tipo_documento == 'cc' %}selected{% endif %}>Cédula de ciudadanía</option>
+                        <option value="ti" {% if cita and cita.paciente.tipo_documento == 'ti' %}selected{% endif %}>Tarjeta de identidad</option>
+                        <option value="pasaporte" {% if cita and cita.paciente.tipo_documento == 'pasaporte' %}selected{% endif %}>Pasaporte</option>
+                        <option value="CE" {% if cita and cita.paciente.tipo_documento == 'CE' %}selected{% endif %}>Cedula de extranjeria</option>
+                        <option value="PPT" {% if cita and cita.paciente.tipo_documento == 'PPT' %}selected{% endif %}>Permiso por protección temporal</option>
+                        <option value="RC" {% if cita and cita.paciente.tipo_documento == 'RC' %}selected{% endif %}>Registro civil</option>
+                        <option value="otro" {% if cita and cita.paciente.tipo_documento == 'otro' %}selected{% endif %}>Otro</option>
                     </select>
                 </div>
 
                 <div>
                     <label>Documento</label>
                     <input type="text" name="documento"
-                           value="{{ cita.documento if cita else '' }}" required>
+                           value="{{ cita.paciente.documento if cita else '' }}" required>
                 </div>
 
                 <div>
                     <label>Teléfono</label>
                     <input type="text" name="telefono"
-                           value="{{ cita.telefono if cita else '' }}" required>
+                           value="{{ cita.paciente.telefono if cita else '' }}" required>
                 </div>
 
                 <div>
@@ -396,6 +396,28 @@ textarea{
     </div>
 
 </div>
+<!--AUTOCOMPLETE -->
+<script>
+document.getElementById('buscar_documento').addEventListener('keyup', function() {
 
+    let doc = this.value;
+
+    if (doc.length < 5) return;
+
+    fetch('/asesor/buscar_paciente?documento=' + doc)
+    .then(res => res.json())
+    .then(data => {
+
+        if (data.nombre) {
+            document.getElementById('nombre').value = data.nombre;
+            document.getElementById('tipo_documento').value = data.tipo_documento;
+            document.getElementById('telefono').value = data.telefono;
+            document.getElementById('documento').value = doc;
+        }
+
+    });
+
+});
+</script>
 </body>
 </html>
